@@ -396,6 +396,10 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .scrim { position: absolute; inset: 0; background: rgba(20,20,22,.45); z-index: 20; }
 .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--p-white); border-radius: 24px 24px 0 0; padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 16px; max-height: calc(100% - 40px); }
 .sheet.full { top: 40px; }
+.ge-foot .btn { white-space: nowrap; }
+.ge-foot .btn.sec { flex: none; padding: 0 16px; }
+.sheet.screen { top: 0; max-height: none; border-radius: 0; padding-top: 38px; }
+@media (max-width: 430px) { .device .sheet.screen { padding-top: 16px; } }
 .anim .scrim { animation: fade .2s ease; }
 .anim .sheet { animation: up .26s cubic-bezier(.2,.8,.2,1); }
 @keyframes fade { from { opacity: 0; } }
@@ -408,6 +412,8 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .sh-head p { margin: 2px 0 0; font-size: 16px; line-height: 20px; color: var(--p-ter); }
 .x { width: 40px; height: 40px; border-radius: 12px; background: var(--p-bg); display: grid; place-items: center; flex: none; }
 .sh-foot .btn { font-size: 16px; line-height: 20px; }
+/* Строки в шторках не сжимаются, когда список длиннее экрана — прокручивается сам список */
+.sh-body > * { flex-shrink: 0; }
 .sh-body { overflow: auto; min-height: 0; display: flex; flex-direction: column; gap: 8px; scrollbar-width: none; }
 .sh-foot { display: flex; gap: 8px; flex: none; }
 .sh-foot .btn { flex: 1; }
@@ -475,6 +481,15 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .org-open .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .org-open b { font-weight: 500; font-size: 15px; line-height: 19px; }
 .org-open small { font-size: 12px; color: var(--p-ter); }
+.crumbs { display: flex; align-items: center; gap: 2px; flex-wrap: nowrap; overflow: hidden; min-height: 32px; }
+.crumbs.open { flex-wrap: wrap; row-gap: 4px; }
+.crumb { height: 28px; padding: 0 8px; border-radius: 8px; background: var(--p-alpha2); font-size: 13px; color: var(--p-sec); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; flex: none; }
+.crumbs:not(.open) .crumb:last-child { flex: 0 1 auto; min-width: 0; }
+.crumb.more { padding: 0 10px; font-weight: 600; }
+.crumb-sep { color: var(--p-light); font-size: 13px; flex: none; }
+.org-depth { margin-left: 8px; font-size: 11px; font-weight: 400; color: var(--p-light); }
+.org-path { color: var(--p-sec) !important; }
+.ge-big { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: #fff4e5; font-size: 14px; line-height: 18px; color: var(--p-ink); }
 .org-back { display: flex; align-items: center; gap: 4px; height: 36px; color: var(--p-sec); font-size: 13px; text-align: left; }
 .org-back span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .org-title { font-size: 17px; font-weight: 600; line-height: 22px; margin: 2px 0 4px; }
@@ -528,6 +543,7 @@ html.app-only body { padding: 0; background: #f3f4f6; }
 /* Шторки не заходят под вырез и статус-бар телефона */
 .app-only .sheet { max-height: calc(100% - 40px - env(safe-area-inset-top, 0px)); }
 .app-only .sheet.full { top: calc(16px + env(safe-area-inset-top, 0px)); }
+.app-only .sheet.screen { top: 0; max-height: none; padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
 </style>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -790,7 +806,13 @@ function buildScenario(id) {
     team[0].fullName = "Константинопольская-Преображенская Е. В.";
     team[1].fullName = "Абдурахмангаджиев-Оглы И. С.";
   }
-  const employees = [me, ...team, ...analysts, ...designers, ...outside];
+  // Сотрудники тестовой ветки на 10 уровней: по 6 человек в каждой из 11 команд (66 — больше порога 50).
+  const SUR = ["Абрамов", "Белова", "Воронин", "Галкина", "Денисов", "Ершова", "Жуков", "Зайцева", "Ильин", "Карпова", "Лаптев", "Мельникова", "Носов", "Осипова", "Панов", "Рябова", "Савин", "Тихонова", "Устинов", "Фомина", "Хохлов", "Цветкова"];
+  const INI = ["А. А.", "Б. В.", "В. Г.", "Г. Д.", "Д. Е.", "Е. И.", "И. К.", "К. Л.", "Л. М.", "М. Н.", "Н. О."];
+  const ROLES = ["iOS-разработчик", "Android-разработчик", "Тестировщик", "Системный аналитик", "Тимлид", "Дизайнер UX/UI"];
+  const deep = [];
+  DEEP_TEAMS.forEach((t, ti) => { for (let k = 0; k < 6; k++) deep.push(emp(`${SUR[(ti * 6 + k) % SUR.length]} ${INI[(ti + k) % INI.length]}`, ROLES[k], t)); });
+  const employees = [me, ...team, ...analysts, ...designers, ...outside, ...deep];
   const ids = (arr) => arr.map((e) => e.id);
   const groups = [
     { id: "g-team", kind: "system", name: "Моя команда", members: ids(team) },
@@ -1225,8 +1247,9 @@ function navbarHTML() {
 }
 
 // ---------- шторки ----------
-function sheetWrap(inner, { full = false } = {}) {
-  return `<div class="scrim" data-act="close"></div><div class="sheet${full ? " full" : ""}" role="dialog" aria-modal="true"><div class="grabber"></div>${inner}</div>`;
+// screen — шторка, раскрытая на весь экран (создание и редактирование группы): без отступа сверху, скругления и «ручки».
+function sheetWrap(inner, { full = false, screen = false } = {}) {
+  return `<div class="scrim" data-act="close"></div><div class="sheet${full ? " full" : ""}${screen ? " screen" : ""}" role="dialog" aria-modal="true">${screen ? "" : `<div class="grabber"></div>`}${inner}</div>`;
 }
 const head = (title, sub = "") => `<div class="sh-head"><div class="t"><h2>${title}</h2>${sub ? `<p>${sub}</p>` : ""}</div><button class="x" data-act="close" aria-label="Закрыть">${X}</button></div>`;
 
@@ -1237,7 +1260,25 @@ const ORG_DEF = [
   ["mkt", "Дирекция маркетинга и коммуникаций", [["Контент"]]],
   ["hr", "Дирекция по персоналу и организационному развитию", [["Персонал"]]],
   ["fin", "Дивизион финансов и правового сопровождения", [["Финансы"], ["Правовой департамент"]]],
+  // Тестовая ветка на 10 уровней: дирекция → … → подгруппа «Ядро СБП». Цепочка «Технологическая дирекция →
+  // Блок цифровых каналов → Управление разработки» — одиночные уровни, они склеиваются в одну строку.
+  ["deep", "Технологическая дирекция", [
+    ["deep-b", "Блок цифровых каналов", [
+      ["deep-u", "Управление разработки", [
+        ["deep-c", "Центр мобильной разработки", [
+          ["deep-ios", "iOS-платформа", [
+            ["deep-cl1", "Кластер «Клиент»", [
+              ["deep-t1", "Трайб «Платежи»", [
+                ["deep-s1", "Стрим «Переводы»", [
+                  ["deep-k1", "Команда «СБП»", ["Ядро СБП", "Интеграции СБП"]],
+                  "Команда «Межбанк»"]],
+                "Стрим «Кошелёк»"]],
+              ["deep-t2", "Трайб «Карты»", ["Выпуск карт", "Лимиты"]]]],
+            ["deep-cl2", "Кластер «Бизнес»", ["Зарплатный проект", "Эквайринг"]]]],
+          ["deep-and", "Android-платформа", ["Android Core", "Android UI"]]]],
+        "Отдел архитектуры"]]]]]],
 ];
+const DEEP_TEAMS = ["Ядро СБП", "Интеграции СБП", "Команда «Межбанк»", "Стрим «Кошелёк»", "Выпуск карт", "Лимиты", "Зарплатный проект", "Эквайринг", "Android Core", "Android UI", "Отдел архитектуры"];
 const orgNode = (x) => {
   const [a, b, c] = typeof x === "string" ? [x] : x;
   return b === undefined ? { id: "t:" + a, name: a, team: a } : { id: a, name: b, children: c.map(orgNode) };
@@ -1262,10 +1303,35 @@ const CHEV_R = `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><pat
 const BIN_I = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M9 6V4.5h4V6M6 6l.8 11.2c.1 1 .9 1.8 1.9 1.8h4.6c1 0 1.8-.8 1.9-1.8L16 6M9.5 9.5v6M12.5 9.5v6" stroke="#222" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 const empRow = (e, sh) => `<button class="res" data-act="gPick" data-e="${e.id}">${boxHTML(sh.members.includes(e.id) ? "on" : "")}<span class="txt"><span class="nm">${esc(e.fullName)}</span><small>${esc(e.position)} · ${e.personnelNumber}</small></span></button>`;
-const orgRow = (n, sh) => {
-  const ppl = peopleOf(n).map((e) => e.id);
-  return `<div class="org-row"><button class="org-chk" data-act="orgCheck" data-v="${n.id}" aria-label="Выбрать «${esc(n.name)}»">${boxHTML(triState(ppl, sh.members))}</button><button class="org-open" data-act="orgOpen" data-v="${n.id}"><span class="txt"><b>${esc(n.name)}</b><small>${people(ppl.length)}</small></span>${CHEV_R}</button></div>`;
+// Склейка: подразделение с единственным дочерним (и без своих людей) показывается одной строкой вместе с ним.
+function glue(n) {
+  const chain = [n];
+  while (n.children && n.children.length === 1) { n = n.children[0]; chain.push(n); }
+  return { target: n, label: chain.map((x) => x.name).join(" › ") };
+}
+// Узел «проходной», если он склеен с единственным ребёнком — в крошках его не показываем отдельно.
+const isPassThrough = (n) => !!(n.children && n.children.length === 1);
+// Путь до узла для подписи в поиске: «Дирекция › … › Родитель» (середина сворачивается).
+function pathLabel(trail) {
+  const names = trail.slice(0, -1).filter((x) => !isPassThrough(x) || x === trail[0]).map((x) => x.name);
+  if (!names.length) return "";
+  return names.length > 3 ? `${names[0]} › … › ${names.slice(-2).join(" › ")}` : names.join(" › ");
+}
+const orgRow = (n, sh, sub = "") => {
+  const { target, label } = glue(n);
+  const ppl = peopleOf(target).map((e) => e.id);
+  return `<div class="org-row"><button class="org-chk" data-act="orgCheck" data-v="${target.id}" aria-label="Выбрать «${esc(target.name)}»">${boxHTML(triState(ppl, sh.members))}</button><button class="org-open" data-act="orgOpen" data-v="${target.id}"><span class="txt"><b>${esc(label)}</b>${sub ? `<small class="org-path">${esc(sub)}</small>` : ""}<small>${people(ppl.length)}</small></span>${CHEV_R}</button></div>`;
 };
+/** Хлебные крошки: «Все › … › Родитель». Тап по любому уровню — сразу туда; «…» раскрывает весь путь. */
+function crumbsHTML(trail, open) {
+  const levels = trail.slice(0, -1).filter((x) => !isPassThrough(x));
+  const crumb = (x) => `<button class="crumb" data-act="orgCrumb" data-v="${x.id}">${esc(x.name)}</button>`;
+  const sep = `<span class="crumb-sep">›</span>`;
+  let items = [`<button class="crumb" data-act="orgCrumb" data-v="">Все</button>`];
+  if (levels.length > 2 && !open) items.push(`<button class="crumb more" data-act="orgCrumbsOpen" aria-label="Показать весь путь">…</button>`, crumb(levels[levels.length - 1]));
+  else items = items.concat(levels.map(crumb));
+  return `<nav class="crumbs${open ? " open" : ""}" aria-label="Путь">${items.join(sep)}</nav>`;
+}
 
 /** Тело экрана группы: таб «По подразделению» (дерево по уровням), «По сотрудникам» (поиск) или панель выбранных. */
 function geditBody(sh) {
@@ -1288,24 +1354,33 @@ function geditBody(sh) {
   }
   // По подразделению: поиск — плоский список совпавших узлов; иначе текущий уровень (уровень = экран).
   if (n) {
+    // Поиск: плоский список совпавших подразделений с путём серым — видно, какая из двух «Аналитик» нужна.
     const found = orgAll().filter((x) => norm(x.name).includes(n));
-    return found.length ? found.map((x) => orgRow(x, sh)).join("") : `<div class="ge-empty">Подразделение «${esc(sh.q.trim())}» не найдено.</div>`;
+    return found.length ? found.map((x) => orgRow(x, sh, pathLabel(orgFind(x.id)))).join("") : `<div class="ge-empty">Подразделение «${esc(sh.q.trim())}» не найдено.</div>`;
   }
   if (!sh.path.length) return ORG.map((x) => orgRow(x, sh)).join("");
-  const trail = orgFind(sh.path[sh.path.length - 1]), node = trail[trail.length - 1], parent = trail[trail.length - 2];
+  const trail = orgFind(sh.path[sh.path.length - 1]), node = trail[trail.length - 1];
   const ppl = peopleOf(node).map((e) => e.id);
-  let html = `<button class="org-back" data-act="orgUp">${ARR(-1)}<span>${parent ? esc(parent.name) : "Все подразделения"}</span></button>
-    <div class="org-title">${esc(node.name)}</div>
+  let html = `${crumbsHTML(trail, sh.crumbsOpen)}
+    <div class="org-title">${esc(node.name)}<span class="org-depth">уровень ${trail.length}</span></div>
     <div class="org-row all"><button class="org-chk wide" data-act="orgCheck" data-v="${node.id}">${boxHTML(triState(ppl, sh.members))}<span>Выбрать всех</span></button></div>`;
   html += node.children ? node.children.map((x) => orgRow(x, sh)).join("") : peopleOf(node).map((e) => empRow(e, sh)).join("");
   return html;
 }
 function geditBar(sh) {
+  if (sh.big) {
+    // Называем подразделение так, как его видел человек: верх склеенной цепочки («Технологическая дирекция»).
+    const trail = orgFind(sh.big.id);
+    let top = trail.length - 1;
+    while (top > 0 && isPassThrough(trail[top - 1])) top--;
+    return `<div class="ge-big" role="alertdialog" aria-label="Подтверждение"><span>Добавить <b>${people(sh.big.n)}</b> из «${esc(trail[top].name)}»?</span><div class="g-menu"><button class="btn sec sm" data-act="bigCancel">Отмена</button><button class="btn sm" data-act="bigOk">Добавить</button></div></div>`;
+  }
   if (!sh.listed.length) return `<div class="ge-bar off">Пока никого не выбрано</div>`;
   return `<button class="ge-bar" data-act="gePanel">${boxHTML(triState(sh.listed, sh.members))}<span>Выбрано ${people(sh.members.length)}</span><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 12.5L10 7.5l5 5" stroke="#525252" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
 }
 // Новый экран группы: по умолчанию таб «По подразделению», как на десктопе.
-const geditState = (id, name, members, back) => ({ kind: "gedit", id, name, members: [...members], listed: [...members], q: "", err: "", tab: "org", path: [], panel: false, back });
+// Таб «По подразделению» открывается там, где человек остановился в прошлый раз (S.lastOrgPath).
+const geditState = (id, name, members, back) => ({ kind: "gedit", id, name, members: [...members], listed: [...members], q: "", err: "", tab: "org", path: [...(S.lastOrgPath || [])], panel: false, back });
 function geditRefresh() {
   if (S.sheet?.kind !== "gedit") return;
   const b = document.getElementById("ge-body"), bar = document.getElementById("ge-bar");
@@ -1407,8 +1482,8 @@ function sheetHTML() {
       <div class="s-input"><img src="assets/left-icon.svg" width="16" height="16" alt=""><input id="ge-q" type="search" placeholder="${ph}" value="${esc(sh.q)}" autocomplete="off"></div></div>`}
       <div class="sh-body" id="ge-body">${geditBody(sh)}</div>
       ${sh.panel ? "" : `<div id="ge-bar">${geditBar(sh)}</div>`}
-      <div class="sh-foot">${sh.panel ? `<button class="btn" data-act="gePanel">Готово</button>`
-        : `${editing ? `<button class="btn sec" data-act="gAskDelEdit">Удалить группу</button>` : ""}<button class="btn" data-act="gSave">Сохранить</button>`}</div>`, { full: true });
+      <div class="sh-foot ge-foot">${sh.panel ? `<button class="btn" data-act="gePanel">Готово</button>`
+        : `${editing ? `<button class="btn sec" data-act="gAskDelEdit">Удалить группу</button>` : ""}<button class="btn" data-act="gSave">Сохранить</button>`}</div>`, { screen: true });
   }
   if (sh.kind === "addto") {
     const e = byId(sh.e), custom = S.data.groups.filter((g) => g.kind === "custom");
@@ -1630,14 +1705,32 @@ phone.addEventListener("click", (ev) => {
     case "gEdit": { const g = groupById(v); S.sheet = geditState(v, g.name, g.members, { ...S.sheet, menu: null, confirm: null }); break; }
     case "geTab": S.sheet.tab = v; S.sheet.q = ""; S.sheet.path = []; break;
     case "gePanel": S.sheet.panel = !S.sheet.panel; break;
-    case "orgOpen": { const t = orgFind(v); S.sheet.path = t.map((x) => x.id); S.sheet.q = ""; const q = document.getElementById("ge-q"); if (q) q.value = ""; geditRefresh(); document.getElementById("ge-body").scrollTop = 0; return; }
-    case "orgUp": S.sheet.path = S.sheet.path.slice(0, -1); geditRefresh(); document.getElementById("ge-body").scrollTop = 0; return;
+    case "orgOpen": case "orgCrumb": {
+      const sh = S.sheet;
+      sh.path = v ? orgFind(v).map((x) => x.id) : [];
+      sh.q = ""; sh.crumbsOpen = false; S.lastOrgPath = sh.path;
+      const q = document.getElementById("ge-q"); if (q) q.value = "";
+      geditRefresh(); document.getElementById("ge-body").scrollTop = 0;
+      return;
+    }
+    case "orgCrumbsOpen": S.sheet.crumbsOpen = true; geditRefresh(); return;
     case "orgCheck": {
       const sh = S.sheet, ids = peopleOf(orgFind(v).pop()).map((e) => e.id);
       const all = ids.every((id) => sh.members.includes(id));
+      const adding = ids.filter((id) => !sh.members.includes(id));
+      // Большая ветка: больше 50 новых людей — сначала спросить.
+      if (!all && adding.length > 50) { sh.big = { id: v, n: adding.length }; geditRefresh(); return; }
       sh.members = all ? sh.members.filter((id) => !ids.includes(id)) : [...new Set([...sh.members, ...ids])];
       for (const id of ids) if (!sh.listed.includes(id)) sh.listed.push(id);
       geditRefresh();
+      return;
+    }
+    case "bigCancel": S.sheet.big = null; geditRefresh(); return;
+    case "bigOk": {
+      const sh = S.sheet, ids = peopleOf(orgFind(sh.big.id).pop()).map((e) => e.id);
+      sh.members = [...new Set([...sh.members, ...ids])];
+      for (const id of ids) if (!sh.listed.includes(id)) sh.listed.push(id);
+      sh.big = null; geditRefresh();
       return;
     }
     case "gAll": { const sh = S.sheet; sh.members = sh.listed.every((id) => sh.members.includes(id)) ? [] : [...sh.listed]; geditRefresh(); return; }
