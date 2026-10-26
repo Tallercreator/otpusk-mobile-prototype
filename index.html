@@ -163,9 +163,14 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .p-body { flex: 1; min-height: 0; margin: 0 12px; border-radius: 16px 16px 0 0; background: var(--p-white); position: relative; display: flex; flex-direction: column; }
 /* Прокрутка обрезает содержимое по скруглению карточки: иначе белая шапка дней при сдвиге вправо
    выходит за край и «съедает» верхний левый угол. */
-.gscroll { border-radius: 16px 16px 0 0; flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 0 12px 24px; }
+.gscroll { border-radius: 16px 16px 0 0; flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 0 12px 24px; }
 .gscroll::-webkit-scrollbar { display: none; }
 .g { width: max-content; min-width: 100%; position: relative; }
+/* Горизонталь отдельно от вертикали: #hs листается только вбок, шапка #gh повторяет его сдвиг */
+.gh { overflow: hidden; }
+.hs { overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; touch-action: pan-x pan-y; }
+.hs::-webkit-scrollbar { display: none; }
+.hs > .g > .g-row.lane.grp:first-child, .hs > .g > .g-cols + .g-row.lane.grp { margin-top: 10px; }
 .g-sticky { position: sticky; top: 0; z-index: 4; background: var(--p-white); padding-top: 12px; }
 .g-row { display: flex; gap: 8px; }
 .g-name { position: sticky; left: 0; z-index: 2; background: var(--p-white); width: var(--nw); flex: none; display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -942,7 +947,10 @@ function gridHTML() {
   const nameCell = (inner, extra = "") => (S.improved && !inner ? "" : `<div class="g-name"${extra}>${inner}</div>`);
 
   const auto = autoCompactable();
-  let html = `<div class="g${noNames ? " nn" : ""}${compact || (auto && S.autoCompact) ? " compact" : ""}${auto ? " auto" : ""}" style="${vars}"><div class="g-sticky">
+  // Шапка дней и строки — в разных контейнерах: строки листаются вбок в #hs (только по горизонтали),
+  // шапка #gh повторяет его scrollLeft. Вертикальная прокрутка — у #gs. Так жест на телефоне идёт по одной оси.
+  const gcls = `g${noNames ? " nn" : ""}${compact || (auto && S.autoCompact) ? " compact" : ""}${auto ? " auto" : ""}`;
+  let html = `<div class="g-sticky"><div class="gh" id="gh"><div class="${gcls}" style="${vars}">
     <div class="g-row g-head">${nw ? (compact ? EXPAND_BTN : auto ? cornerNavHTML() + AUTO_EXPAND_BTN : cornerNavHTML()) : ""}
       <div class="g-track">${ds.map((d) => `<button class="dh${isOff(d) ? " we" : ""}${same(d, TODAY) ? " today" : ""}" data-act="overlap" data-d="${iso(d)}"><b>${d.getDate()}</b><span>${WD[d.getDay()]}</span></button>`).join("")}</div></div>`;
   if (S.showOverlaps) {
@@ -956,7 +964,7 @@ function gridHTML() {
       return `<button class="ov${cls}" data-act="overlap" data-d="${iso(d)}" aria-label="${people(n)} ${d.getDate()} ${MONTHS_GEN[d.getMonth()]}">${n || "·"}</button>`;
     }).join("")}</div></div>`;
   }
-  html += `</div>`;
+  html += `</div></div></div><div class="hs" id="hs"><div class="${gcls}" style="${vars}">`;
 
   const row = (e) => {
     const abs = absInRange(e, ds[0], ds[ds.length - 1]).filter((a) => !(a.long && S.hideLongTerm));
@@ -977,7 +985,7 @@ function gridHTML() {
       const bars = abs.map((a) => barHTML({ ...a, eid: e.id }, ds, cw, gap)).join("");
       html += `<div class="g-row nn-lane${S.flashId === e.id ? " flash" : ""}" data-row="${e.id}"><div class="g-track">${bars}</div></div>`;
     }
-    return html + `</div>`;
+    return html + `</div></div>`;
   }
   for (const b of blocks()) {
     html += `<div class="g-row lane grp"><div class="g-name"><span class="grp-chip">${esc(b.title)}</span></div></div>`;
@@ -993,7 +1001,7 @@ function gridHTML() {
       }
     } else html += b.members.map(row).join("");
   }
-  return html + `</div>`;
+  return html + `</div></div>`;
 }
 
 function listHTML() {
@@ -1270,8 +1278,8 @@ let lastSheetKind = null;
 function render() {
   // Новый период открывается с начала — колонка ФИО снова полная.
   if (S.needScroll) { S.autoCompact = false; S.pinVis = 0; }
-  const gs = document.getElementById("gs");
-  const keep = gs ? { l: gs.scrollLeft, t: gs.scrollTop } : null;
+  const gs = document.getElementById("gs"), hs0 = HS();
+  const keep = gs ? { l: hs0 ? hs0.scrollLeft : 0, t: gs.scrollTop } : null;
   const calBody = document.getElementById("cal-body");
   const calTop = calBody ? calBody.scrollTop : null;
   const sheetKind = S.sheet?.kind ?? null;
@@ -1284,13 +1292,15 @@ function render() {
       S.needScroll = false;
       const ds = S.mode === "year" || S.view === "list" ? null : visibleDays();
       const ti = ds ? ds.findIndex((d) => same(d, TODAY)) : -1;
-      const cw = parseFloat(ngs.querySelector(".g")?.style.getPropertyValue("--cw")) || 32;
+      const hs = HS(), cw = parseFloat(hs?.querySelector(".g")?.style.getPropertyValue("--cw")) || 32;
       // В улучшенной версии период открывается на «сегодня», в макетной — с первого дня.
-      ngs.scrollLeft = S.improved && ti > 1 ? (ti - 1) * (cw + 4) : 0;
+      if (hs) hs.scrollLeft = S.improved && ti > 1 ? (ti - 1) * (cw + 4) : 0;
       ngs.scrollTop = 0;
-    } else if (keep) { ngs.scrollLeft = S.restoreLeft ?? keep.l; ngs.scrollTop = keep.t; }
+    } else if (keep) { const hs = HS(); if (hs) hs.scrollLeft = S.restoreLeft ?? keep.l; ngs.scrollTop = keep.t; }
     S.restoreLeft = null;
+    syncHead();
     ngs.addEventListener("scroll", onGridScroll, { passive: true });
+    HS()?.addEventListener("scroll", onHScroll, { passive: true });
   }
   measureHeader();
   applyScroll();
@@ -1316,6 +1326,10 @@ function measureHeader() {
   if (gs) gs.style.paddingTop = HDR.c + "px";
   else if (body) body.style.paddingTop = HDR.c + "px";
 }
+const HS = () => document.getElementById("hs");
+// Шапка дней повторяет горизонтальный сдвиг строк.
+function syncHead() { const hs = HS(), gh = document.getElementById("gh"); if (hs && gh) gh.scrollLeft = hs.scrollLeft; }
+function onHScroll() { syncHead(); applyScroll(); }
 // Всё, что зависит от прокрутки, применяется одним кадром; раскладка при этом не меняется.
 function applyScroll() {
   const gs = document.getElementById("gs");
@@ -1330,21 +1344,17 @@ function applyScroll() {
     gs?.style.setProperty("--st", -p + "px");
     return;
   }
-  const g = gs?.querySelector(".g.auto"); if (!g) return;
-  const nw = parseFloat(g.style.getPropertyValue("--nw")) || 150;
+  const hs = HS(), gs2 = phone.querySelectorAll(".g.auto"); if (!hs || !gs2.length) return;
+  const nw = parseFloat(gs2[0].style.getPropertyValue("--nw")) || 150;
   // pinVis — колонку раскрыли кнопкой «ФИО»: держим её ширину, пока не вернутся к началу или не сменят период.
-  if (S.pinVis && gs.scrollLeft <= 0 && !expanding) S.pinVis = 0;
-  const w = S.pinVis || Math.max(36, Math.min(nw, nw - gs.scrollLeft));
-  g.style.setProperty("--vis", w + "px");
+  if (S.pinVis && hs.scrollLeft <= 0 && !expanding) S.pinVis = 0;
+  const w = S.pinVis || Math.max(36, Math.min(nw, nw - hs.scrollLeft));
   // Подпись периода в углу видна целиком до 100 px ширины колонки и гаснет к 60 px, где появляются две буквы.
-  g.style.setProperty("--nco", String(Math.min(1, Math.max(0, (w - 60) / 40))));
-  // Две буквы и нижняя панель — с небольшим гистерезисом, чтобы не мигали на границе.
+  const nco = String(Math.min(1, Math.max(0, (w - 60) / 40)));
+  // Две буквы — с небольшим гистерезисом, чтобы не мигали на границе.
   const want = w <= 60 ? true : w >= 72 ? false : S.autoCompact;
-  if (want !== S.autoCompact) {
-    S.autoCompact = want;
-    g.classList.toggle("compact", want);
-    gs.closest(".p-body").classList.toggle("auto-c", want);
-  }
+  S.autoCompact = want;
+  for (const g of gs2) { g.style.setProperty("--vis", w + "px"); g.style.setProperty("--nco", nco); g.classList.toggle("compact", want); }
 }
 /**
  * «ФИО» в сжатой колонке: раскрыть имена, не возвращаясь к началу месяца. Колонка растёт до 150 px,
@@ -1358,12 +1368,12 @@ function nextFrame(fn) {
   requestAnimationFrame(run); setTimeout(run, 34);
 }
 function expandNamesInPlace() {
-  const gs = document.getElementById("gs"), g = gs?.querySelector(".g.auto"); if (!g) return;
+  const gs = HS(), g = gs?.querySelector(".g.auto"); if (!g) return;
   const nw = parseFloat(g.style.getPropertyValue("--nw")) || 150;
   const w0 = parseFloat(g.style.getPropertyValue("--vis")) || 36, l0 = gs.scrollLeft;
   const l1 = Math.max(0, l0 - (nw - w0));
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.hidden;
-  const step = (k) => { S.pinVis = w0 + (nw - w0) * k; gs.scrollLeft = l0 + (l1 - l0) * k; applyScroll(); };
+  const step = (k) => { S.pinVis = w0 + (nw - w0) * k; gs.scrollLeft = l0 + (l1 - l0) * k; onHScroll(); };
   if (reduce) { expanding = true; step(1); expanding = false; return; }
   expanding = true;
   const t0 = performance.now(), dur = 240, ease = (x) => 1 - Math.pow(1 - x, 3);
@@ -1380,7 +1390,7 @@ function expandNamesInPlace() {
  * и у начала месяца, пока их не раскроют кнопкой «ФИО »».
  */
 function collapseNamesInPlace() {
-  const gs = document.getElementById("gs"), g = gs?.querySelector(".g.auto");
+  const gs = HS(), g = gs?.querySelector(".g.auto");
   if (!g) { S.avatarsOnly = true; render(); return; }
   const nw = parseFloat(g.style.getPropertyValue("--nw")) || 150;
   const w0 = parseFloat(g.style.getPropertyValue("--vis")) || nw, l0 = gs.scrollLeft;
@@ -1391,7 +1401,7 @@ function collapseNamesInPlace() {
     S.restoreLeft = Math.max(0, gs.scrollLeft + 36 - nw);
     render();
   };
-  const step = (k) => { S.pinVis = w0 + (36 - w0) * k; gs.scrollLeft = l0 + (l1 - l0) * k; applyScroll(); };
+  const step = (k) => { S.pinVis = w0 + (36 - w0) * k; gs.scrollLeft = l0 + (l1 - l0) * k; onHScroll(); };
   expanding = true;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.hidden) { step(1); done(); return; }
   const t0 = performance.now(), dur = 240, ease = (x) => 1 - Math.pow(1 - x, 3);
@@ -1468,7 +1478,7 @@ phone.addEventListener("click", (ev) => {
       if (visible) {
         S.sheet = null; S.flashId = id; render();
         const gs = document.getElementById("gs"), r = gs.querySelector(`[data-row="${id}"]`);
-        if (r) gs.scrollTo({ top: r.offsetTop - 120, behavior: "smooth" });
+        if (r) gs.scrollTo({ top: gs.scrollTop + r.getBoundingClientRect().top - gs.getBoundingClientRect().top - 140, behavior: "smooth" });
         setTimeout(() => { S.flashId = null; }, 2500);
         return;
       }
