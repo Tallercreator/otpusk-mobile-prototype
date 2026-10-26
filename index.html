@@ -170,13 +170,19 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .gh { overflow: hidden; }
 .hs { overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; touch-action: pan-x pan-y; }
 .hs::-webkit-scrollbar { display: none; }
-.hs > .g > .g-row.lane.grp:first-child, .hs > .g > .g-cols + .g-row.lane.grp { margin-top: 10px; }
+/* Подпись группы — белый разделитель секции на всю ширину: колонки дней идут внутри секции
+   и не просвечивают под текстом. Отступ сверху — padding, чтобы белый закрывал и зазор. */
+.hs .g-row.lane.grp, .hs .g-row.lane:has(> .g-name .sub-chip) { margin-top: 0; padding-top: 16px; background: var(--p-white); position: relative; z-index: 1; }
+.hs .g-row.lane:has(> .g-name .sub-chip):not(.grp) { padding-top: 8px; }
+.hs > .g > .g-row.lane.grp:first-child, .hs > .g > .g-cols + .g-row.lane.grp { padding-top: 10px; }
 .g-sticky { position: sticky; top: 0; z-index: 4; background: var(--p-white); padding-top: 12px; }
 .g-row { display: flex; gap: 8px; }
 .g-name { position: sticky; left: 0; z-index: 2; background: var(--p-white); width: var(--nw); flex: none; display: flex; align-items: center; gap: 8px; min-width: 0; }
 .g-track { position: relative; display: flex; gap: var(--gap); width: var(--tw); flex: none; }
 /* «Как в макете»: колонка ФИО закрывает отступ карточки слева и зазор справа, клетки под ней не просвечивают */
-.phone:not(.imp) .g-name { box-shadow: -12px 0 0 var(--p-white), 8px 0 0 var(--p-white); }
+/* Колонка ФИО — сплошная белая панель: закрывает зазоры между строками (8 px сверху и снизу) и 8 px до дат,
+   поэтому колонки и полосы не просвечивают у аватарок. */
+.phone:not(.imp) .g-name { box-shadow: -4px 0 0 8px var(--p-white), 0 0 0 8px var(--p-white); }
 .g-head .g-name { z-index: 5; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; text-align: left; }
 .g-head .g-name b { font-weight: 500; }
 .g-head .g-name span { color: var(--p-light); }
