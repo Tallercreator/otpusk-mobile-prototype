@@ -138,11 +138,12 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .p-main { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
 /* Улучшенная версия: шапка лежит поверх графика и уезжает вверх ровно на столько, на сколько прокручен график
    (transform, без изменения раскладки), поэтому контент не прыгает и не ускоряется. */
-.phone.imp .p-main > .p-controls { position: absolute; top: 0; left: 0; right: 0; z-index: 5; background: var(--p-bg); will-change: transform; }
-.phone.imp .p-main > .p-body { background: transparent; }
-.phone.imp .p-main > .p-body::before { content: ""; position: absolute; left: 0; right: 0; top: var(--wt, 0px); bottom: 0; background: var(--p-white); border-radius: 16px 16px 0 0; pointer-events: none; }
-.phone.imp .p-main .gscroll { position: relative; z-index: 1; border-radius: 0; clip-path: inset(var(--wt, 0px) 0 0 0 round 16px 16px 0 0); }
-.phone.imp .p-main .g-sticky { top: var(--st, 0px); }
+.p-main.ovl > .p-ovl { position: absolute; top: 0; left: 0; right: 0; z-index: 5; background: var(--p-bg); will-change: transform; }
+.p-main.ovl > .p-body { background: transparent; }
+.p-main.ovl > .p-body::before { content: ""; position: absolute; left: 0; right: 0; top: var(--wt, 0px); bottom: 0; background: var(--p-white); border-radius: 16px 16px 0 0; pointer-events: none; }
+.p-main.ovl .gscroll { position: relative; z-index: 1; border-radius: 0; clip-path: inset(var(--wt, 0px) 0 0 0 round 16px 16px 0 0); }
+.p-main.ovl .g-sticky { top: var(--st, 0px); }
+.p-main.ovl > .p-body > .pnav { position: relative; z-index: 2; }
 .phone.imp .p-main .ctl-fold { opacity: var(--fo, 1); }
 .row { display: flex; gap: 8px; align-items: center; }
 .field { flex: 1; min-width: 0; height: 40px; border-radius: 12px; background: var(--p-field); display: flex; align-items: center; gap: 8px; padding: 0 12px; color: var(--p-ter); text-align: left; }
@@ -522,8 +523,8 @@ img { max-width: 100%; }
       </div></div>
       <div class="imp"><div class="num">03</div><div>
         <h3>Шапка сворачивается при прокрутке графика</h3>
-        <p>До первой строки графика в макете около 300 px из 812. При прокрутке вниз поиск и выбор групп уезжают вверх вместе с графиком, ровно на столько, на сколько сдвинулся палец, и постепенно гаснут. Потом период и шапка дней «прилипают» к верху. Раскладка при этом не меняется, поэтому ничего не прыгает и не ускоряется. Прокрутка вверх возвращает шапку тем же путём.</p>
-        <div class="meta"><span class="tag imp-only">только «С улучшениями»</span></div>
+        <p>До первой строки графика в макете около 300 px из 812. При прокрутке вниз поиск и выбор групп уезжают вверх вместе с графиком, ровно на столько, на сколько сдвинулся палец, и постепенно гаснут. Потом период и шапка дней «прилипают» к верху. Раскладка при этом не меняется, поэтому ничего не прыгает и не ускоряется. Прокрутка вверх возвращает шапку тем же путём. В «Как в макете» вместе с графиком уезжает вся верхняя часть — шапка «Отпуск», вкладки, поиск, группы, «Отображение» и «Легенда», — и на экране остаётся только график, нижняя панель периода и таб бар.</p>
+        <div class="meta"><span class="tag">в обеих версиях</span></div>
       </div></div>
       <div class="imp"><div class="num">04</div><div>
         <h3>Вид «Список» для главного мобильного вопроса</h3>
@@ -874,9 +875,9 @@ function groupsLabel() {
 }
 const displayCount = () => [S.showOverlaps, S.groupByTeam, S.hideLongTerm].filter(Boolean).length + (S.legendFilter ? 1 : 0);
 
+const STATUS_HTML = `<div class="p-status"><span>4:20</span><i></i></div>`;
 function headerHTML() {
-  return `<div class="p-status"><span>4:20</span><i></i></div>
-  <div class="p-head">
+  return `<div class="p-head">
     <button class="logo" data-act="logo" aria-label="Отпуск"><img src="assets/logo-mini.svg" width="20" height="20" alt=""></button>
     <span class="title">Отпуск</span>
     <button class="icon-btn" data-act="search" aria-label="Поиск"><img src="assets/img.svg" width="24" height="24" alt=""></button>
@@ -1305,7 +1306,13 @@ function render() {
   const sheetKind = S.sheet?.kind ?? null;
   phone.classList.toggle("imp", S.improved);
   phone.classList.toggle("anim", sheetKind !== null && sheetKind !== lastSheetKind);
-  phone.innerHTML = headerHTML() + `<div class="p-main">${S.tab === "team" ? controlsHTML() : ""}${bodyHTML()}</div>` + navbarHTML() + sheetHTML() + (S.toast ? `<div class="toast">${S.toast}</div>` : "");
+  // Верхняя часть лежит поверх графика (.p-ovl) и уезжает вместе с прокруткой. В «Как в макете» уезжает всё —
+  // шапка «Отпуск», вкладки и фильтры, — и на экране остаётся только график; в улучшенной — поиск.
+  const ctl = S.tab === "team" ? controlsHTML() : "";
+  const main = S.improved
+    ? `${headerHTML()}<div class="p-main ovl"><div class="p-ovl">${ctl}</div>${bodyHTML()}</div>`
+    : `<div class="p-main ovl"><div class="p-ovl">${headerHTML()}${ctl}</div>${bodyHTML()}</div>`;
+  phone.innerHTML = STATUS_HTML + main + navbarHTML() + sheetHTML() + (S.toast ? `<div class="toast">${S.toast}</div>` : "");
   const ngs = document.getElementById("gs");
   if (ngs) {
     if (S.needScroll) {
@@ -1339,12 +1346,14 @@ function render() {
 // Высоты шапки улучшенной версии: вся шапка (Hc) и сворачиваемая часть — поиск и группы (Hf).
 let HDR = { c: 0, f: 0 };
 function measureHeader() {
-  const main = phone.querySelector(".p-main"), ctl = main?.querySelector(":scope > .p-controls");
-  if (!S.improved || !ctl) { HDR = { c: 0, f: 0 }; return; }
+  const main = phone.querySelector(".p-main"), ctl = main?.querySelector(":scope > .p-ovl");
+  if (!ctl) { HDR = { c: 0, f: 0 }; return; }
+  // Сколько уезжает: в улучшенной — поиск (сворачиваемая часть), в «Как в макете» — вся верхняя часть.
   const fold = ctl.querySelector(".ctl-fold");
-  HDR = { c: ctl.offsetHeight, f: fold ? fold.offsetHeight + 12 : 0 };
-  const gs = document.getElementById("gs"), body = main.querySelector(".p-body");
+  HDR = { c: ctl.offsetHeight, f: S.improved ? (fold ? fold.offsetHeight + 12 : 0) : ctl.offsetHeight };
+  const gs = document.getElementById("gs"), body = main.querySelector(":scope > :not(.p-ovl)");
   if (gs) gs.style.paddingTop = HDR.c + "px";
+  else if (body?.classList.contains("my-ph")) body.style.marginTop = HDR.c + 16 + "px";
   else if (body) body.style.paddingTop = HDR.c + "px";
 }
 const HS = () => document.getElementById("hs");
@@ -1354,17 +1363,17 @@ function onHScroll() { syncHead(); applyScroll(); }
 // Всё, что зависит от прокрутки, применяется одним кадром; раскладка при этом не меняется.
 function applyScroll() {
   const gs = document.getElementById("gs");
-  if (S.improved) {
-    const main = phone.querySelector(".p-main"); if (!main) return;
-    const ctl = main.querySelector(":scope > .p-controls"), body = main.querySelector(".p-body");
+  const main = phone.querySelector(".p-main");
+  if (main) {
+    const ctl = main.querySelector(":scope > .p-ovl"), body = main.querySelector(".p-body");
     const p = Math.min(Math.max(gs ? gs.scrollTop : 0, 0), HDR.f);
     if (ctl) ctl.style.transform = `translate3d(0, ${-p}px, 0)`;
     main.style.setProperty("--fo", HDR.f ? String(1 - p / HDR.f) : "1");
     body?.style.setProperty("--wt", HDR.c - p + "px");
     // Липкая шапка дней отсчитывается от padding-top прокрутки (= высота шапки), поэтому сдвиг — просто −p.
     gs?.style.setProperty("--st", -p + "px");
-    return;
   }
+  if (S.improved) return;
   const hs = HS(), gs2 = phone.querySelectorAll(".g.auto"); if (!hs || !gs2.length) return;
   const nw = parseFloat(gs2[0].style.getPropertyValue("--nw")) || 150;
   // pinVis — колонку раскрыли кнопкой «ФИО»: держим её ширину, пока не вернутся к началу или не сменят период.
