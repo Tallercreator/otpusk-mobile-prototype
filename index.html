@@ -290,7 +290,7 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .g-row.nn-lane { margin-top: 16px; position: relative; }
 .g-row.nn-lane .g-track { height: 32px; border-radius: 8px; background: var(--p-alpha); }
 .g-row.nn-lane .bar { top: 4px; }
-.pnav { position: relative; z-index: 2; flex: none; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; border-top: 1px solid #eef0f2; background: var(--p-white); }
+.pnav { position: relative; z-index: 2; flex: none; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; border-top: 1px solid #eef0f2; background: var(--p-white); }
 .pnav .arr { width: 40px; height: 40px; display: grid; place-items: center; }
 .pn-mid { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .pnav .cur { white-space: nowrap; }
@@ -307,7 +307,8 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .g.auto .g-row > .g-name { width: var(--vis, var(--nw)); margin-right: calc(-1 * var(--vis, var(--nw)) - 8px); overflow: hidden; }
 .g.auto .g-row.lane.grp > .g-name, .g.auto .g-row.lane > .g-name:has(.sub-chip) { overflow: visible; }
 .g.auto .g-row > .g-track { margin-left: calc(var(--nw) + 8px); }
-.g.auto .g-head .nav-corner { margin-left: 0; opacity: var(--nco, 1); }
+.g.auto .g-head .nav-corner { margin-left: 0; }
+.g.auto .g-head .nav-corner .nc-cap { opacity: var(--nco, 1); }
 .g.auto .g-head .nav-corner > * { flex-shrink: 0; }
 .g.auto .g-head .nav-corner .nc-mid { width: 110px; }
 .g.auto .lane .g-name > * { flex-shrink: 0; }
@@ -325,9 +326,9 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .disp-btn { position: relative; }
 .disp-btn .count { position: absolute; top: -4px; right: -4px; border: 2px solid var(--p-bg); box-sizing: content-box; }
 /* Угол сетки — подпись периода (без стрелок) */
-.g-head .nav-corner { flex-direction: row; align-items: center; justify-content: space-between; gap: 4px; margin-left: 0; width: var(--nw); text-align: left; }
+.g-head .nav-corner { flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; margin-left: 0; width: var(--nw); text-align: left; }
 .nav-corner .nc-mid { flex: 1; min-width: 0; align-items: flex-start; text-align: left; }
-.nc-cap { font-size: 12px; line-height: 14px; color: var(--p-ter); padding-left: 4px; white-space: nowrap; }
+.nc-cap { font-size: 12px; line-height: 14px; color: var(--p-ter); white-space: nowrap; }
 .pnav .cur { gap: 8px; }
 .pnav .cur img { flex: none; }
 .pn-txt { align-items: flex-start; }
@@ -335,14 +336,16 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .nc-hide:active { background: var(--p-field); }
 .nav-corner .nc-main { padding: 0; font-size: 14px; }
 .nav-corner .nc-sub { padding: 0; }
-.g.compact .g-head .nc-expand { flex-direction: column; align-items: center; justify-content: center; gap: 0; font-size: 10px; color: var(--p-ter); border-radius: 8px; }
+.g-head .nc-expand { flex-direction: row; align-items: center; justify-content: flex-start; }
 /* Строки подзаголовков (группы, команды): без клеток, текст может выходить за узкую колонку */
 .g-row.lane.grp .g-name, .q-grp .g-name, .g-row.lane .g-name:has(.sub-chip) { overflow: visible; z-index: 3; height: 20px; box-shadow: none; background: transparent; }
 .g-row.lane.grp, .q-grp { margin-top: 16px; }
 .g-sticky + .g-row.lane.grp, .g-sticky + .q-cols + .q-grp, .g-sticky + .g-cols + .g-row.lane.grp { margin-top: 10px; }
 .g.compact .sub-chip { max-width: none; flex: none; padding-left: 4px; font-size: 12px; }
 .g.compact .q-peaks .g-name, .g.compact .g-ovrow .g-name { font-size: 10px; }
-.pnav .cur { display: flex; align-items: center; gap: 8px; font-weight: 500; height: 40px; padding: 0 8px; }
+/* Период — единая кнопка-плашка: иконка календаря + название + масштаб, фон как у полей сверху */
+.pnav .cur { display: flex; align-items: center; gap: 8px; font-weight: 500; height: 44px; padding: 0 14px 0 10px; border-radius: 12px; background: var(--p-field); }
+.pnav .cur:active { background: #dfe2e6; }
 /* «Как в макете»: подложка строки 2% серого поверх сквозных колонок — пересечения дают «шахматку» */
 .phone:not(.imp) .g-row.lane:not(.grp) > .g-track { height: 36px; border-radius: 8px; background: var(--p-alpha); }
 .phone:not(.imp) .g-row.lane { position: relative; }
@@ -941,7 +944,7 @@ function barHTML(a, ds, cw, gap, extraCls = "") {
  */
 /** Угол сетки «Как в макете»: заголовок колонки «ФИО» и «‹‹» — скрыть имена. Период — только в нижней панели. */
 function cornerNavHTML() {
-  return `<div class="g-name nav-corner"><span class="nc-cap">ФИО</span><button class="nc-hide" data-act="collapseNames" aria-label="Скрыть ФИО">${HIDE_I}</button></div>`;
+  return `<div class="g-name nav-corner"><button class="nc-hide" data-act="collapseNames" aria-label="Скрыть ФИО">${HIDE_I}</button><span class="nc-cap">ФИО</span></div>`;
 }
 const isNoNames = () => !S.improved && S.showOverlaps && S.mode !== "year";
 function gridHTML() {
@@ -1143,8 +1146,10 @@ function pnavHTML() {
     <button class="arr" data-act="step" data-v="1" aria-label="Следующий ${unit}">${ARR(1)}</button></div>`;
 }
 const HIDE_I = `<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M15 4.5L9.5 10l5.5 5.5M10 4.5L4.5 10l5.5 5.5" stroke="#717171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const AUTO_EXPAND_BTN = `<button class="g-name nc-expand auto-x" data-act="unscroll" aria-label="Показать ФИО"><span>ФИО</span><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 4.5L10.5 10 5 15.5M10 4.5L15.5 10 10 15.5" stroke="#222" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
-const EXPAND_BTN = `<button class="g-name nc-expand" data-act="expandNames" aria-label="Показать ФИО"><span>ФИО</span>${`<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 4.5L10.5 10 5 15.5M10 4.5L15.5 10 10 15.5" stroke="#222" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`}</button>`;
+const SHOW_I = `<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 4.5L10.5 10 5 15.5M10 4.5L15.5 10 10 15.5" stroke="#717171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Кнопка ФИО — одна и та же серая 32×32 у левого края угла в обоих состояниях; меняется только направление стрелок.
+const AUTO_EXPAND_BTN = `<div class="g-name nc-expand auto-x"><button class="nc-hide" data-act="unscroll" aria-label="Показать ФИО">${SHOW_I}</button></div>`;
+const EXPAND_BTN = `<div class="g-name nc-expand"><button class="nc-hide" data-act="expandNames" aria-label="Показать ФИО">${SHOW_I}</button></div>`;
 
 function bodyHTML() {
   if (S.tab === "my") return `<div class="my-ph">Раздел «Мой отпуск» вне прототипа</div>`;
