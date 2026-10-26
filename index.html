@@ -848,9 +848,12 @@ const AVA = (e, two = false) => `<span class="ava a${(e.fullName.charCodeAt(0) +
 // «Как в макете»: колонка ФИО сжата до аватарок, навигация периода уходит вниз карточки.
 // Аватар с запасной второй буквой: видна только в сжатой колонке (.g.compact).
 const AVA_AUTO = (e) => `<span class="ava a${(e.fullName.charCodeAt(0) + e.fullName.length) % 4}"><span>${esc(e.fullName[0])}<i>${esc((e.fullName.split(" ")[1] || "")[0] || "")}</i></span></span>`;
-const compactNames = () => !S.improved && S.avatarsOnly && !(S.showOverlaps && S.mode !== "year");
+// Неделя и короткий период (до 8 дней) помещаются без прокрутки, если ФИО сжаты до аватарок:
+// там это вид по умолчанию, а дни растягиваются на всю ширину. «ФИО »» раскрывает имена (namesShown).
+const fitsCompact = () => !S.improved && (S.mode === "week" || (S.mode === "range" && visibleDays().length <= 8));
+const compactNames = () => !S.improved && !(S.showOverlaps && S.mode !== "year") && (S.avatarsOnly || (fitsCompact() && !S.namesShown));
 // Автосжатие: «Как в макете», сетка с полной колонкой ФИО — при прокрутке вправо колонка сжимается до аватарок.
-const autoCompactable = () => !S.improved && !S.avatarsOnly && !isNoNames() && S.mode !== "year" && S.view === "grid";
+const autoCompactable = () => !S.improved && !compactNames() && !isNoNames() && S.mode !== "year" && S.view === "grid";
 const X = `<img src="assets/cross.svg" width="24" height="24" alt="">`;
 const CHECK = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7.2l2.6 2.6L11 4.4" stroke="#222" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ARR = (d) => `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="${d < 0 ? "M12.5 4.5L7 10l5.5 5.5" : "M7.5 4.5L13 10l-5.5 5.5"}" stroke="#222" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -950,7 +953,7 @@ function gridHTML() {
   const compact = compactNames();
   const nw = S.improved || noNames ? 0 : compact ? 36 : 150;
   let cw = noNames ? 45 : 32;
-  if (S.mode === "week") cw = Math.max(32, Math.floor((bodyW - (nw ? nw + 8 : 0) + gap) / 7) - gap);
+  if (S.mode === "week" || fitsCompact()) cw = Math.max(32, Math.floor((bodyW - (nw ? nw + 8 : 0) + gap) / ds.length) - gap);
   const tw = ds.length * (cw + gap) - gap;
   const vars = `--cw:${cw}px;--gap:${gap}px;--tw:${tw}px;--nw:${nw}px`;
   const cells = (cls = "") => ds.map((d) => `<span class="cell${isOff(d) ? " we" : ""}${same(d, TODAY) ? " today" : ""}${cls}"></span>`).join("");
@@ -1405,12 +1408,12 @@ function expandNamesInPlace() {
  */
 function collapseNamesInPlace() {
   const gs = HS(), g = gs?.querySelector(".g.auto");
-  if (!g) { S.avatarsOnly = true; render(); return; }
+  if (!g) { S.avatarsOnly = true; S.namesShown = false; render(); return; }
   const nw = parseFloat(g.style.getPropertyValue("--nw")) || 150;
   const w0 = parseFloat(g.style.getPropertyValue("--vis")) || nw, l0 = gs.scrollLeft;
   const l1 = l0 + (w0 - 36);
   const done = () => {
-    expanding = false; S.pinVis = 0; S.avatarsOnly = true;
+    expanding = false; S.pinVis = 0; S.avatarsOnly = true; S.namesShown = false;
     // В узкой раскладке дорожка дат начинается на 114 px раньше — пересчитываем прокрутку, чтобы даты остались на месте.
     S.restoreLeft = Math.max(0, gs.scrollLeft + 36 - nw);
     render();
@@ -1443,7 +1446,7 @@ phone.addEventListener("click", (ev) => {
     case "dtoggle": if (S.improved) S[v] = !S[v]; else S.sheet.draft[v] = !S.sheet.draft[v]; break;
     case "dReset": S.sheet.draft = { showOverlaps: false, groupByTeam: false, hideLongTerm: false }; break;
     // Из «Только аватарок»: колонка становится полной и лежит поверх, прокрутка та же — даты сдвигаются вправо на ширину ФИО.
-    case "expandNames": S.avatarsOnly = false; S.pinVis = 150; break;
+    case "expandNames": S.avatarsOnly = false; if (fitsCompact()) S.namesShown = true; S.pinVis = 150; break;
     case "unscroll": expandNamesInPlace(); return;
     case "collapseNames": collapseNamesInPlace(); return;
     case "dApply": Object.assign(S, S.sheet.draft); S.sheet = null; break;
