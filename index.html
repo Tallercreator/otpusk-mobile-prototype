@@ -328,6 +328,9 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .g.compact .sub-chip { max-width: none; flex: none; padding-left: 4px; font-size: 12px; }
 .g.compact .q-peaks .g-name, .g.compact .g-ovrow .g-name { font-size: 10px; }
 .pnav .cur { display: flex; align-items: center; gap: 8px; font-weight: 500; height: 40px; padding: 0 8px; }
+/* «Как в макете»: подложка строки 2% серого поверх сквозных колонок — пересечения дают «шахматку» */
+.phone:not(.imp) .g-row.lane:not(.grp) > .g-track { height: 36px; border-radius: 8px; background: var(--p-alpha); }
+.phone:not(.imp) .g-row.lane { position: relative; }
 .g-cols { position: absolute; top: 0; bottom: 0; left: 0; display: flex; gap: var(--gap); pointer-events: none; }
 .g-cols span { width: var(--cw); flex: none; border-radius: 8px; background: var(--p-alpha); }
 .g-cols span.we { background: transparent; }
@@ -973,11 +976,12 @@ function gridHTML() {
     // Улучшенная версия: без отсутствий в периоде — одна строка с именем, без пустой дорожки.
     const idle = S.improved && !abs.length;
     const nm = compact ? AVA(e, true) : `${auto ? AVA_AUTO(e) : AVA(e)}<span class="nm">${esc(e.fullName)}${e.isMe ? " <em>(Я)</em>" : ""}${longHidden ? ` <em>· ${esc(e.absences.find((a) => a.long).label.toLowerCase())}</em>` : idle ? " <em>· на месте</em>" : ""}</span>`;
-    const track = idle ? "" : `<div class="g-track">${S.improved ? "" : cells()}${bars}</div>`;
+    // Клеток в строке нет: дни — сквозные колонки (.g-cols), у строки — своя серая подложка (как в макете 8818-44101).
+    const track = idle ? "" : `<div class="g-track">${bars}</div>`;
     return `<div class="g-row lane${idle ? " idle" : ""}${S.flashId === e.id ? " flash" : ""}" data-row="${e.id}"><button class="g-name" data-act="card" data-e="${e.id}" aria-label="${esc(e.fullName)}">${nm}</button>${track}</div>`;
   };
-  // Улучшенная версия и макетный режим пересечений: дни — сквозные колонки на всю высоту графика.
-  if (S.improved || noNames) html += `<div class="g-cols">${ds.map((d) => `<span class="${isOff(d) ? "we" : ""}${same(d, TODAY) ? " today" : ""}"></span>`).join("")}</div>`;
+  // Дни — сквозные колонки на всю высоту графика (во всех режимах); в макете начинаются после колонки ФИО.
+  html += `<div class="g-cols"${nw ? ` style="left:${nw + 8}px"` : ""}>${ds.map((d) => `<span class="${isOff(d) ? "we" : ""}${same(d, TODAY) ? " today" : ""}"></span>`).join("")}</div>`;
   if (noNames) {
     // Без ФИО: одна дорожка на человека (без дублей между группами), кто это — по тапу на полосу.
     for (const e of uniqueVisible()) {
