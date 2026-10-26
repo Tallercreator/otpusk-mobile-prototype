@@ -443,6 +443,53 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .abs-card .dates { font-weight: 500; }
 .also { font-size: 13px; color: var(--p-sec); }
 
+/* Группы: свои с «⋯», системные с замком, новая группа, экран группы */
+.g-item { border-radius: 12px; transition: background .15s; }
+.g-item.open { background: var(--p-alpha2); padding-bottom: 10px; }
+.g-line { display: flex; align-items: center; gap: 4px; }
+.g-line .chk-row { flex: 1; min-width: 0; padding-left: 4px; }
+.g-more, .g-lock { width: 40px; height: 40px; display: grid; place-items: center; flex: none; border-radius: 10px; }
+.g-more:active { background: var(--p-field); }
+.g-menu { display: flex; gap: 8px; padding: 0 8px; }
+.btn.sm { height: 40px; padding: 0 14px; font-size: 14px; flex: 1; }
+.btn.danger { color: #c62f3d; }
+.btn.danger-fill { background: #d93545; color: #fff; }
+.g-confirm { display: flex; flex-direction: column; gap: 10px; padding: 2px 8px 0; font-size: 13px; line-height: 17px; color: var(--p-sec); }
+.g-new { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 4px; font-weight: 500; text-align: left; width: 100%; }
+.g-plus { width: 24px; height: 24px; border-radius: 7px; background: var(--p-lime); display: grid; place-items: center; flex: none; }
+.ge-name { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.ge-name label { font-size: 12px; color: var(--p-ter); }
+.ge-name input { height: 44px; border: 0; border-radius: 12px; background: var(--p-field); padding: 0 12px; font: inherit; font-size: 16px; color: var(--p-ink); outline: none; }
+.ge-name input:focus { box-shadow: inset 0 0 0 1.5px var(--p-ink); }
+.ge-name.err input { box-shadow: inset 0 0 0 1.5px #d93545; }
+.ge-err { font-size: 12px; line-height: 14px; color: #c62f3d; }
+.ge-err:empty { display: none; }
+.ge-add { display: flex; flex-direction: column; gap: 8px; flex: none; }
+.ge-lbl { font-size: 12px; color: var(--p-ter); }
+.ge-seg { padding: 3px; border-radius: 12px; }
+.ge-seg button { height: 34px; border-radius: 10px; font-size: 14px; }
+.org-row { display: flex; align-items: center; gap: 4px; min-height: 52px; border-bottom: 1px solid #f0f1f3; }
+.org-chk { width: 40px; height: 44px; display: grid; place-items: center; flex: none; }
+.org-chk.wide { width: auto; display: flex; gap: 12px; padding-left: 8px; font-size: 14px; color: var(--p-sec); }
+.org-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; text-align: left; min-height: 52px; }
+.org-open .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.org-open b { font-weight: 500; font-size: 15px; line-height: 19px; }
+.org-open small { font-size: 12px; color: var(--p-ter); }
+.org-back { display: flex; align-items: center; gap: 4px; height: 36px; color: var(--p-sec); font-size: 13px; text-align: left; }
+.org-back span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.org-title { font-size: 17px; font-weight: 600; line-height: 22px; margin: 2px 0 4px; }
+.res > .box { flex: none; }
+.ge-bar { flex: none; display: flex; align-items: center; gap: 10px; width: 100%; height: 48px; padding: 0 12px; border-radius: 12px; background: #f9f9fa; font-size: 14px; color: var(--p-sec); text-align: left; }
+.ge-bar span:not(.box) { flex: 1; }
+.ge-bar.off { color: var(--p-light); }
+.ge-panel-head { display: flex; align-items: center; gap: 10px; padding: 4px 0 4px 8px; font-size: 13px; color: var(--p-ter); }
+.ge-panel-head span:not(.box) { flex: 1; }
+.ge-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ge-chip { height: 32px; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px 0 2px; border-radius: 10px; background: var(--p-field); font-size: 13px; max-width: 100%; }
+.ge-chip .ava { width: 28px; height: 28px; font-size: 12px; }
+.ge-chip span:not(.ava) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ge-empty { font-size: 13px; color: var(--p-ter); padding: 4px 0; }
+
 /* Календарь */
 .cal-wd { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 14px; color: var(--p-sec); padding-bottom: 8px; border-bottom: 1px solid #eef0f2; flex: none; }
 .cal-wd span:nth-child(n+6) { color: #ed7126; }
@@ -605,7 +652,7 @@ img { max-width: 100%; }
       <div class="audit-wrap"><table class="audit">
         <thead><tr><th>Функция десктопа</th><th>На мобиле</th><th>Почему</th></tr></thead>
         <tbody>
-          <tr><td>Создание, редактирование и удаление групп (модалка с орг-деревом, табы «По подразделению / По сотрудникам»)</td><td><span class="verdict v-cut">Убрать</span></td><td>Редкое и тяжёлое действие: дерево с массовыми чекбоксами, панель участников. На телефоне остаётся выбор готовых групп и подсказка, что настраивать их удобнее на компьютере.</td></tr>
+          <tr><td>Создание, редактирование и удаление групп (модалка с орг-деревом, табы «По подразделению / По сотрудникам»)</td><td><span class="verdict v-simplify">Упростить</span></td><td>Та же модалка, что на десктопе (9162-135260), на весь экран: название, табы «По подразделению / По сотрудникам». Дерево открывается по уровням: тап проваливает в подразделение, «Выбрать всех» отмечает его целиком. Панель «Выбрано N человек» стала полосой над кнопками и раскрывается списком; снятая галка оставляет строку. Плюс мобильный вход: «Добавить в группу» из карточки человека.</td></tr>
           <tr><td>Сборка «Несортированной группы» из поиска и «Сохранить в группу»</td><td><span class="verdict v-cut">Убрать</span></td><td>Это инлайн-редактор группы. На телефоне поиск только находит человека: прокручивает к его строке или открывает карточку.</td></tr>
           <tr><td>Перетаскивание строк (dnd)</td><td><span class="verdict v-cut">Убрать</span></td><td>Конфликтует с прокруткой в двух осях. Порядок, заданный на десктопе, сохраняется и показывается.</td></tr>
           <tr><td>Закрепление строк скрепкой</td><td><span class="verdict v-cut">Убрать действие</span></td><td>Закрепы с десктопа показываются, а «Мой график» всегда первый. Отдельная иконка на каждой строке съедает ширину.</td></tr>
@@ -1145,6 +1192,10 @@ function pnavHTML() {
     <span class="pn-mid"><button class="cur" data-act="periods" aria-label="Выбрать период: ${esc(label)}"><img src="assets/calendar.svg" width="24" height="24" alt=""><span class="pn-txt"><b>${esc(label)}</b><small>${sub}</small></span></button>${back}</span>
     <button class="arr" data-act="step" data-v="1" aria-label="Следующий ${unit}">${ARR(1)}</button></div>`;
 }
+const LOCK_I = `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4.5" y="9" width="11" height="8" rx="2" stroke="#ababab" stroke-width="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="#ababab" stroke-width="1.5"/></svg>`;
+const DOTS_I = `<svg width="20" height="20" viewBox="0 0 20 20" fill="#525252"><circle cx="4.5" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="15.5" cy="10" r="1.6"/></svg>`;
+const PLUS_I = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#222" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+const XS_I = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="#717171" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 const HIDE_I = `<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M15 4.5L9.5 10l5.5 5.5M10 4.5L4.5 10l5.5 5.5" stroke="#717171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const SHOW_I = `<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 4.5L10.5 10 5 15.5M10 4.5L15.5 10 10 15.5" stroke="#717171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 // Кнопка ФИО — одна и та же серая 32×32 у левого края угла в обоих состояниях; меняется только направление стрелок.
@@ -1179,6 +1230,95 @@ function sheetWrap(inner, { full = false } = {}) {
 }
 const head = (title, sub = "") => `<div class="sh-head"><div class="t"><h2>${title}</h2>${sub ? `<p>${sub}</p>` : ""}</div><button class="x" data-act="close" aria-label="Закрыть">${X}</button></div>`;
 
+// Орг-структура для таба «По подразделению»: дивизионы → подразделения → команды (листья = Employee.team).
+const ORG_DEF = [
+  ["it", "Дивизион информационных технологий", [["Продуктовый офис"], ["it-dev", "Разработка и качество", ["Разработка", "Качество и тестирование"]], ["Платформа"], ["Дизайн интерфейсов"]]],
+  ["risk", "Дивизион по управлению рисками", [["Аналитика данных"], ["Бизнес-анализ"]]],
+  ["mkt", "Дирекция маркетинга и коммуникаций", [["Контент"]]],
+  ["hr", "Дирекция по персоналу и организационному развитию", [["Персонал"]]],
+  ["fin", "Дивизион финансов и правового сопровождения", [["Финансы"], ["Правовой департамент"]]],
+];
+const orgNode = (x) => {
+  const [a, b, c] = typeof x === "string" ? [x] : x;
+  return b === undefined ? { id: "t:" + a, name: a, team: a } : { id: a, name: b, children: c.map(orgNode) };
+};
+const ORG = ORG_DEF.map(orgNode);
+function orgFind(id, nodes = ORG, trail = []) {
+  for (const n of nodes) {
+    if (n.id === id) return [...trail, n];
+    if (n.children) { const r = orgFind(id, n.children, [...trail, n]); if (r) return r; }
+  }
+  return null;
+}
+const orgAll = (nodes = ORG) => nodes.flatMap((n) => [n, ...(n.children ? orgAll(n.children) : [])]);
+const peopleOf = (n) => (n.team ? S.data.employees.filter((e) => e.team === n.team) : n.children.flatMap(peopleOf));
+function triState(ids, members) {
+  const k = ids.filter((id) => members.includes(id)).length;
+  return k === 0 ? "" : k === ids.length ? "on" : "some";
+}
+const DASH = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="#222" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+const boxHTML = (st) => `<span class="box${st ? " on" : ""}">${st === "on" ? CHECK : st === "some" ? DASH : ""}</span>`;
+const CHEV_R = `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M7.5 4.5L13 10l-5.5 5.5" stroke="#ababab" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const BIN_I = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M9 6V4.5h4V6M6 6l.8 11.2c.1 1 .9 1.8 1.9 1.8h4.6c1 0 1.8-.8 1.9-1.8L16 6M9.5 9.5v6M12.5 9.5v6" stroke="#222" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+const empRow = (e, sh) => `<button class="res" data-act="gPick" data-e="${e.id}">${boxHTML(sh.members.includes(e.id) ? "on" : "")}<span class="txt"><span class="nm">${esc(e.fullName)}</span><small>${esc(e.position)} · ${e.personnelNumber}</small></span></button>`;
+const orgRow = (n, sh) => {
+  const ppl = peopleOf(n).map((e) => e.id);
+  return `<div class="org-row"><button class="org-chk" data-act="orgCheck" data-v="${n.id}" aria-label="Выбрать «${esc(n.name)}»">${boxHTML(triState(ppl, sh.members))}</button><button class="org-open" data-act="orgOpen" data-v="${n.id}"><span class="txt"><b>${esc(n.name)}</b><small>${people(ppl.length)}</small></span>${CHEV_R}</button></div>`;
+};
+
+/** Тело экрана группы: таб «По подразделению» (дерево по уровням), «По сотрудникам» (поиск) или панель выбранных. */
+function geditBody(sh) {
+  if (sh.panel) {
+    // Панель «Выбрано N человек»: снятая галка оставляет строку на месте (как на десктопе), корзина очищает список.
+    const listed = sh.listed.map(byId).filter(Boolean);
+    const st = triState(sh.listed, sh.members);
+    let html = `<div class="ge-panel-head"><button class="org-chk" data-act="gAll" aria-label="Выбрать всех">${boxHTML(st)}</button><span>Выбрано ${people(sh.members.length)}</span><button class="g-more" data-act="gClear" aria-label="Очистить список">${BIN_I}</button></div>`;
+    if (!listed.length) return html + `<div class="ge-empty">Пока никого. Добавь людей по подразделению или поиском.</div>`;
+    for (const t of [...new Set(listed.map((e) => e.team))]) {
+      html += `<div class="sh-sep">${esc(t)}</div>` + listed.filter((e) => e.team === t).map((e) => empRow(e, sh)).join("");
+    }
+    return html;
+  }
+  const n = norm(sh.q.trim());
+  if (sh.tab === "emp") {
+    if (!n) return `<div class="ge-empty">Начни вводить ФИО, табельный номер или должность.</div>`;
+    const list = S.data.employees.filter((e) => norm(`${e.fullName} ${e.personnelNumber} ${e.position}`).includes(n));
+    return list.length ? list.map((e) => empRow(e, sh)).join("") : `<div class="ge-empty">Никого не нашли по «${esc(sh.q.trim())}». Проверь написание.</div>`;
+  }
+  // По подразделению: поиск — плоский список совпавших узлов; иначе текущий уровень (уровень = экран).
+  if (n) {
+    const found = orgAll().filter((x) => norm(x.name).includes(n));
+    return found.length ? found.map((x) => orgRow(x, sh)).join("") : `<div class="ge-empty">Подразделение «${esc(sh.q.trim())}» не найдено.</div>`;
+  }
+  if (!sh.path.length) return ORG.map((x) => orgRow(x, sh)).join("");
+  const trail = orgFind(sh.path[sh.path.length - 1]), node = trail[trail.length - 1], parent = trail[trail.length - 2];
+  const ppl = peopleOf(node).map((e) => e.id);
+  let html = `<button class="org-back" data-act="orgUp">${ARR(-1)}<span>${parent ? esc(parent.name) : "Все подразделения"}</span></button>
+    <div class="org-title">${esc(node.name)}</div>
+    <div class="org-row all"><button class="org-chk wide" data-act="orgCheck" data-v="${node.id}">${boxHTML(triState(ppl, sh.members))}<span>Выбрать всех</span></button></div>`;
+  html += node.children ? node.children.map((x) => orgRow(x, sh)).join("") : peopleOf(node).map((e) => empRow(e, sh)).join("");
+  return html;
+}
+function geditBar(sh) {
+  if (!sh.listed.length) return `<div class="ge-bar off">Пока никого не выбрано</div>`;
+  return `<button class="ge-bar" data-act="gePanel">${boxHTML(triState(sh.listed, sh.members))}<span>Выбрано ${people(sh.members.length)}</span><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 12.5L10 7.5l5 5" stroke="#525252" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+}
+// Новый экран группы: по умолчанию таб «По подразделению», как на десктопе.
+const geditState = (id, name, members, back) => ({ kind: "gedit", id, name, members: [...members], listed: [...members], q: "", err: "", tab: "org", path: [], panel: false, back });
+function geditRefresh() {
+  if (S.sheet?.kind !== "gedit") return;
+  const b = document.getElementById("ge-body"), bar = document.getElementById("ge-bar");
+  if (b) b.innerHTML = geditBody(S.sheet);
+  if (bar) bar.innerHTML = geditBar(S.sheet);
+}
+function geditError(msg) {
+  S.sheet.err = msg;
+  document.getElementById("ge-err").textContent = msg;
+  document.getElementById("ge-namebox").classList.toggle("err", !!msg);
+  if (msg) document.getElementById("ge-name").focus({ preventScroll: true });
+}
+
 function sheetHTML() {
   const sh = S.sheet; if (!sh) return "";
   if (sh.kind === "card") {
@@ -1202,8 +1342,8 @@ function sheetHTML() {
       ? (focus ? card(focus) + also : "") + (sorted.length > (focus ? 1 : 0) ? `<div class="sh-sep">${focus ? "Другие отсутствия" : "Отсутствия"} в 2026</div>` + sorted.filter((a) => a !== focus).map(card).join("") : "")
       : `<div class="note">Отсутствий не запланировано</div>`;
     return sheetWrap(`${head(esc(e.fullName), `${esc(e.position)} · таб. № ${e.personnelNumber}`)}
-      <div class="sh-body">${inGroups ? "" : `<div class="note">Не входит в выбранные группы. Добавить человека в группу можно в веб-версии.</div>`}${body}</div>
-      <div class="sh-foot"><button class="btn" data-act="close">Закрыть</button></div>`);
+      <div class="sh-body">${inGroups ? "" : `<div class="note">Не входит в выбранные группы.</div>`}${body}</div>
+      <div class="sh-foot"><button class="btn sec" data-act="addTo" data-e="${e.id}">Добавить в группу</button><button class="btn" data-act="close">Закрыть</button></div>`);
   }
   if (sh.kind === "periods") {
     const o = (v, l) => `<button class="opt${sh.draft === v ? " on" : ""}" data-act="pmode" data-v="${v}">${l}</button>`;
@@ -1241,13 +1381,42 @@ function sheetHTML() {
       <div class="sh-foot"><button class="btn" data-act="close">Закрыть</button></div>`);
   }
   if (sh.kind === "groups") {
+    // Свои группы — с меню «⋯» (изменить / удалить), системные — с замком: их состав собирается автоматически (BR-001).
     const g = (x) => {
-      const on = sh.draft.includes(x.id);
-      return `<button class="chk-row" data-act="gtoggle" data-v="${x.id}"><span class="txt"><b>${esc(x.name)}</b><small>${x.kind === "system" ? "Системная" : "Моя группа"} · ${people(x.members.length)}</small></span><span class="box${on ? " on" : ""}">${on ? CHECK : ""}</span></button>`;
+      const on = sh.draft.includes(x.id), sys = x.kind === "system";
+      const open = sh.menu === x.id, confirm = sh.confirm === x.id;
+      let extra = "";
+      if (confirm) extra = `<div class="g-confirm"><span>Удалить группу «${esc(x.name)}»? Люди останутся в остальных группах.</span><div class="g-menu"><button class="btn sec sm" data-act="gCancelDel">Отмена</button><button class="btn sm danger-fill" data-act="gDel" data-v="${x.id}">Удалить</button></div></div>`;
+      else if (open) extra = `<div class="g-menu"><button class="btn sec sm" data-act="gEdit" data-v="${x.id}">Изменить</button><button class="btn sec sm danger" data-act="gAskDel" data-v="${x.id}">Удалить</button></div>`;
+      return `<div class="g-item${open || confirm ? " open" : ""}"><div class="g-line"><button class="chk-row" data-act="gtoggle" data-v="${x.id}"><span class="box${on ? " on" : ""}">${on ? CHECK : ""}</span><span class="txt"><b>${esc(x.name)}</b><small>${sys ? "Системная" : "Моя группа"} · ${people(x.members.length)}</small></span></button>${sys
+        ? `<span class="g-lock" title="Системная группа: состав меняется автоматически" aria-label="Системная группа, изменить нельзя">${LOCK_I}</span>`
+        : `<button class="g-more" data-act="gMenu" data-v="${x.id}" aria-label="Действия с группой «${esc(x.name)}»" aria-expanded="${open}">${DOTS_I}</button>`}</div>${extra}</div>`;
     };
     return sheetWrap(`${head("Группы", "Порядок выбора = порядок блоков в графике")}<div class="sh-body">${S.data.groups.map(g).join("")}
-      ${S.improved ? `<div class="note">Создавать и редактировать группы удобнее на компьютере — в веб-версии раздела.</div>` : ""}</div>
+      <button class="g-new" data-act="gNew"><span class="g-plus">${PLUS_I}</span>Новая группа</button></div>
       <div class="sh-foot"><button class="btn" data-act="gApply">Применить</button></div>`);
+  }
+  if (sh.kind === "gedit") {
+    // Как десктопная модалка «Добавление новой группы» (9162-135260, 9154-125549): название, табы
+    // «По подразделению / По сотрудникам», панель «Выбрано N человек», «Удалить группу» и «Сохранить».
+    const editing = !!sh.id;
+    const ph = sh.tab === "org" ? "Поиск по подразделению" : "Поиск по ФИО, табельному или должности";
+    return sheetWrap(`<div class="sh-head"><div class="t"><h2>${editing ? "Редактирование группы" : "Добавление новой группы"}</h2></div><button class="x" data-act="geBack" aria-label="Закрыть">${X}</button></div>
+      ${sh.panel ? "" : `<div class="ge-name${sh.err ? " err" : ""}" id="ge-namebox"><label for="ge-name">Название группы</label><input id="ge-name" value="${esc(sh.name)}" placeholder="Например, мои ассистенты" maxlength="40" autocomplete="off"><div class="ge-err" id="ge-err">${sh.err ? esc(sh.err) : ""}</div></div>
+      <div class="ge-add"><span class="ge-lbl">Добавить сотрудников</span><div class="seg ge-seg"><button class="${sh.tab === "org" ? "on" : ""}" data-act="geTab" data-v="org">По подразделению</button><button class="${sh.tab === "emp" ? "on" : ""}" data-act="geTab" data-v="emp">По сотрудникам</button></div>
+      <div class="s-input"><img src="assets/left-icon.svg" width="16" height="16" alt=""><input id="ge-q" type="search" placeholder="${ph}" value="${esc(sh.q)}" autocomplete="off"></div></div>`}
+      <div class="sh-body" id="ge-body">${geditBody(sh)}</div>
+      ${sh.panel ? "" : `<div id="ge-bar">${geditBar(sh)}</div>`}
+      <div class="sh-foot">${sh.panel ? `<button class="btn" data-act="gePanel">Готово</button>`
+        : `${editing ? `<button class="btn sec" data-act="gAskDelEdit">Удалить группу</button>` : ""}<button class="btn" data-act="gSave">Сохранить</button>`}</div>`, { full: true });
+  }
+  if (sh.kind === "addto") {
+    const e = byId(sh.e), custom = S.data.groups.filter((g) => g.kind === "custom");
+    const row = (g) => { const on = sh.draft.includes(g.id); return `<button class="chk-row" data-act="atToggle" data-v="${g.id}"><span class="box${on ? " on" : ""}">${on ? CHECK : ""}</span><span class="txt"><b>${esc(g.name)}</b><small>${people(g.members.length)}</small></span></button>`; };
+    return sheetWrap(`${head("Добавить в группу", esc(e.fullName))}<div class="sh-body">${custom.map(row).join("") || `<div class="note">Своих групп пока нет.</div>`}
+      <button class="g-new" data-act="gNewFor" data-e="${e.id}"><span class="g-plus">${PLUS_I}</span>Новая группа с ${esc(e.fullName.split(" ")[0])}</button>
+      <div class="note">В системные группы («Моя команда», «Параллель») люди попадают автоматически.</div></div>
+      <div class="sh-foot"><button class="btn sec" data-act="atBack">Назад</button><button class="btn" data-act="atApply">Готово</button></div>`);
   }
   if (sh.kind === "calendar") {
     const from = sh.from ? parse(sh.from) : null, to = sh.to ? parse(sh.to) : null;
@@ -1455,6 +1624,77 @@ phone.addEventListener("click", (ev) => {
     case "groups": S.sheet = { kind: "groups", draft: [...S.data.selected] }; break;
     case "gtoggle": { const d = S.sheet.draft; S.sheet.draft = d.includes(v) ? d.filter((x) => x !== v) : [...d, v]; break; }
     case "gApply": S.data.selected = S.sheet.draft; S.sheet = null; S.needScroll = true; break;
+    // --- свои группы: создать, изменить, удалить ---
+    case "gMenu": S.sheet.menu = S.sheet.menu === v ? null : v; S.sheet.confirm = null; break;
+    case "gNew": S.sheet = geditState(null, "", [], { ...S.sheet, menu: null, confirm: null }); break;
+    case "gEdit": { const g = groupById(v); S.sheet = geditState(v, g.name, g.members, { ...S.sheet, menu: null, confirm: null }); break; }
+    case "geTab": S.sheet.tab = v; S.sheet.q = ""; S.sheet.path = []; break;
+    case "gePanel": S.sheet.panel = !S.sheet.panel; break;
+    case "orgOpen": { const t = orgFind(v); S.sheet.path = t.map((x) => x.id); S.sheet.q = ""; const q = document.getElementById("ge-q"); if (q) q.value = ""; geditRefresh(); document.getElementById("ge-body").scrollTop = 0; return; }
+    case "orgUp": S.sheet.path = S.sheet.path.slice(0, -1); geditRefresh(); document.getElementById("ge-body").scrollTop = 0; return;
+    case "orgCheck": {
+      const sh = S.sheet, ids = peopleOf(orgFind(v).pop()).map((e) => e.id);
+      const all = ids.every((id) => sh.members.includes(id));
+      sh.members = all ? sh.members.filter((id) => !ids.includes(id)) : [...new Set([...sh.members, ...ids])];
+      for (const id of ids) if (!sh.listed.includes(id)) sh.listed.push(id);
+      geditRefresh();
+      return;
+    }
+    case "gAll": { const sh = S.sheet; sh.members = sh.listed.every((id) => sh.members.includes(id)) ? [] : [...sh.listed]; geditRefresh(); return; }
+    case "gClear": S.sheet.members = []; S.sheet.listed = []; geditRefresh(); return;
+    case "gAskDel": S.sheet.confirm = v; break;
+    case "gCancelDel": S.sheet.confirm = null; S.sheet.menu = null; break;
+    case "gDel": {
+      const g = groupById(v); if (!g || g.kind === "system") break;
+      S.data.groups = S.data.groups.filter((x) => x.id !== v);
+      S.data.selected = S.data.selected.filter((x) => x !== v);
+      S.sheet.draft = S.sheet.draft.filter((x) => x !== v);
+      S.sheet.menu = S.sheet.confirm = null; S.needScroll = true;
+      toast(`Группа «${esc(g.name)}» удалена`);
+      break;
+    }
+    case "gAskDelEdit": S.sheet = { ...S.sheet.back, kind: "groups", draft: S.sheet.back?.draft ?? [...S.data.selected], menu: S.sheet.id, confirm: S.sheet.id }; break;
+    case "geBack": S.sheet = S.sheet.back || null; break;
+    case "gPick": {
+      const sh = S.sheet, id = el.dataset.e;
+      sh.members = sh.members.includes(id) ? sh.members.filter((x) => x !== id) : [...sh.members, id];
+      if (!sh.listed.includes(id)) sh.listed.push(id);
+      geditRefresh();
+      return;
+    }
+    case "gSave": {
+      const sh = S.sheet, name = sh.name.trim();
+      if (!name) { geditError("Введи название группы"); return; }
+      if (S.data.groups.some((g) => g.id !== sh.id && norm(g.name) === norm(name))) { geditError("Группа с таким названием уже есть"); return; }
+      if (sh.id) {
+        Object.assign(groupById(sh.id), { name, members: [...sh.members] });
+        toast(`Группа «${esc(name)}» сохранена`);
+      } else {
+        const id = "g-u" + Date.now();
+        S.data.groups.push({ id, kind: "custom", name, members: [...sh.members] });
+        if (!S.data.selected.includes(id)) S.data.selected = [...S.data.selected, id];
+        toast(`Группа «${esc(name)}» создана и показана в графике`);
+      }
+      // Из карточки сотрудника — обратно в карточку; иначе сразу к графику.
+      S.sheet = sh.back?.kind === "card" ? sh.back : null; S.needScroll = true;
+      break;
+    }
+    // --- «Добавить в группу» из карточки сотрудника ---
+    case "addTo": { const id = el.dataset.e; S.sheet = { kind: "addto", e: id, draft: S.data.groups.filter((g) => g.kind === "custom" && g.members.includes(id)).map((g) => g.id), back: S.sheet }; break; }
+    case "atToggle": { const d = S.sheet.draft; S.sheet.draft = d.includes(v) ? d.filter((x) => x !== v) : [...d, v]; break; }
+    case "atBack": S.sheet = S.sheet.back; break;
+    case "atApply": {
+      const sh = S.sheet, added = [];
+      for (const g of S.data.groups.filter((x) => x.kind === "custom")) {
+        const has = g.members.includes(sh.e), want = sh.draft.includes(g.id);
+        if (want && !has) { g.members = [...g.members, sh.e]; added.push(g.name); }
+        if (!want && has) g.members = g.members.filter((x) => x !== sh.e);
+      }
+      if (added.length) toast(`Добавлено в ${added.map((n) => `«${esc(n)}»`).join(", ")}`);
+      S.sheet = sh.back; S.needScroll = true;
+      break;
+    }
+    case "gNewFor": S.sheet = geditState(null, "", [el.dataset.e], S.sheet.back); break;
     case "display": S.sheet = { kind: "display", draft: { showOverlaps: S.showOverlaps, groupByTeam: S.groupByTeam, hideLongTerm: S.hideLongTerm } }; break;
     case "dtoggle": if (S.improved) S[v] = !S[v]; else S.sheet.draft[v] = !S.sheet.draft[v]; break;
     case "dReset": S.sheet.draft = { showOverlaps: false, groupByTeam: false, hideLongTerm: false }; break;
@@ -1525,6 +1765,8 @@ phone.addEventListener("click", (ev) => {
 });
 phone.addEventListener("input", (ev) => {
   if (ev.target.id === "q") { S.sheet.q = ev.target.value; document.getElementById("res").innerHTML = searchResults(S.sheet.q); }
+  if (ev.target.id === "ge-name") { S.sheet.name = ev.target.value; if (S.sheet.err) geditError(""); }
+  if (ev.target.id === "ge-q") { S.sheet.q = ev.target.value; geditRefresh(); }
 });
 // Долгий тап по логотипу — панель модератора (замена ⌘⇧S на телефоне).
 let lpTimer, longPressed = false;
