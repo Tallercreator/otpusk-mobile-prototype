@@ -455,11 +455,14 @@ html.app-only body { padding: 0; background: #f3f4f6; }
 .app-only .notes, .app-only .modebar, .app-only .stage-hint { display: none; }
 .app-only .stage { position: static; height: 100%; gap: 0; }
 .app-only .stage > * { max-width: none; }
-.app-only .device { width: 100%; max-width: none; height: 100%; min-height: 0; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.app-only .device { width: 100%; max-width: none; height: var(--app-h, 100%); min-height: 0; padding: 0; border-radius: 0; background: none; box-shadow: none; }
 .app-only .device .phone { border-radius: 0; padding-top: env(safe-area-inset-top, 0px); background: linear-gradient(#fff 0 env(safe-area-inset-top, 0px), var(--p-bg) 0); }
 .app-only .device .p-status { display: none; }
 .app-only .p-nav { padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); border-radius: 12px 12px 0 0; }
 @media (min-width: 481px) { .app-only .device { box-shadow: 0 0 0 1px #e3e6ea; } }
+/* Шторки не заходят под вырез и статус-бар телефона */
+.app-only .sheet { max-height: calc(100% - 40px - env(safe-area-inset-top, 0px)); }
+.app-only .sheet.full { top: calc(16px + env(safe-area-inset-top, 0px)); }
 </style>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1314,7 +1317,8 @@ function render() {
     else { const now = document.getElementById("cal-now"); if (now) cb.scrollTop = now.offsetTop - cb.offsetTop; }
   }
   if (sheetKind === "search" && lastSheetKind !== "search") {
-    const q = document.getElementById("q"); q.focus();
+    // preventScroll: иначе iOS при открытии клавиатуры сдвигает всю страницу вверх.
+    const q = document.getElementById("q"); q.focus({ preventScroll: true });
   }
   lastSheetKind = sheetKind;
   syncChrome();
@@ -1558,6 +1562,20 @@ loadScenario(SCENARIOS.some(([id]) => id === qs) ? qs : "small");
 // Прямые ссылки на версию: …#mock — «Как в макете», …#imp — «С улучшениями» (по умолчанию).
 // Сборка «только приложение» открывается версией по макету; #imp — с улучшениями.
 const APP_ONLY = document.documentElement.classList.contains("app-only");
+// На телефоне клавиатура уменьшает видимую область: приложение подстраивает высоту под неё
+// (шторка поиска остаётся над клавиатурой), а сдвиг страницы, который делает iOS, сразу отменяется.
+if (APP_ONLY && window.visualViewport) {
+  const vv = window.visualViewport;
+  const fit = () => {
+    document.documentElement.style.setProperty("--app-h", Math.round(vv.height) + "px");
+    if (window.scrollY || vv.offsetTop) window.scrollTo(0, 0);
+  };
+  vv.addEventListener("resize", fit);
+  vv.addEventListener("scroll", fit);
+  window.addEventListener("resize", fit);
+  window.addEventListener("scroll", () => { if (window.scrollY) window.scrollTo(0, 0); }, { passive: true });
+  fit();
+}
 if (location.hash === "#mock" || (APP_ONLY && location.hash !== "#imp")) { S.improved = false; S.showOverlaps = false; }
 render();
 })();
