@@ -510,8 +510,25 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .ge-bar { flex: none; display: flex; align-items: center; gap: 10px; width: 100%; height: 48px; padding: 0 12px; border-radius: 12px; background: #f9f9fa; font-size: 14px; color: var(--p-sec); text-align: left; }
 .ge-bar span:not(.box) { flex: 1; }
 .ge-bar.off { color: var(--p-light); }
-.ge-panel-head { display: flex; align-items: center; gap: 10px; padding: 4px 0 4px 8px; font-size: 13px; color: var(--p-ter); }
+.ge-panel-head { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 13px; color: var(--p-ter); }
 .ge-panel-head span:not(.box) { flex: 1; }
+.ge-fold { font-size: 13px; font-weight: 500; color: var(--p-ink); padding: 8px 6px; border-radius: 8px; white-space: nowrap; }
+.ge-team { display: flex; align-items: center; min-height: 52px; border-bottom: 1px solid #f0f1f3; }
+.ge-team-list { padding-left: 24px; border-bottom: 1px solid #f0f1f3; }
+.ge-team-list > .res:last-child { border-bottom: 0; }
+.ge-team-tg { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 52px; text-align: left; }
+.ge-team-tg span { flex: 1; min-width: 0; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; color: var(--p-sec); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ge-team-tg small { font-size: 12px; color: var(--p-ter); flex: none; }
+.ge-team-tg svg { flex: none; transition: transform .2s ease; }
+.ge-team.open .ge-team-tg svg { transform: rotate(180deg); }
+.ge-panel-top { flex-direction: row; align-items: center; }
+.ge-panel-top .x { order: -1; }
+.ge-dlg-scrim { position: absolute; inset: 0; z-index: 30; background: rgba(20,20,22,.45); display: grid; place-items: center; padding: 24px; }
+.ge-dlg { width: 100%; max-width: 320px; background: var(--p-white); border-radius: 20px; padding: 20px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+.ge-dlg h3 { margin: 0 0 2px; font-size: 18px; line-height: 22px; font-weight: 600; padding: 0 8px; }
+.ge-dlg p { margin: 0 0 8px; font-size: 14px; line-height: 18px; color: var(--p-ter); padding: 0 8px; }
+.ge-dlg .g-menu { padding: 0; }
+@media (prefers-reduced-motion: reduce) { .ge-team-tg svg { transition: none; } }
 .ge-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .ge-chip { height: 32px; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px 0 2px; border-radius: 10px; background: var(--p-field); font-size: 13px; max-width: 100%; }
 .ge-chip .ava { width: 28px; height: 28px; font-size: 12px; }
@@ -1350,12 +1367,20 @@ function crumbsHTML(trail, open) {
 function geditBody(sh) {
   if (sh.panel) {
     // Панель «Выбрано N человек»: снятая галка оставляет строку на месте (как на десктопе), корзина очищает список.
+    // Подразделения сворачиваются: при длинном списке (больше 20 человек) они открываются свёрнутыми.
     const listed = sh.listed.map(byId).filter(Boolean);
     const st = triState(sh.listed, sh.members);
-    let html = `<div class="ge-panel-head"><button class="org-chk" data-act="gAll" aria-label="Выбрать всех">${boxHTML(st)}</button><span>Выбрано ${people(sh.members.length)}</span><button class="g-more" data-act="gClear" aria-label="Очистить список">${BIN_I}</button></div>`;
+    const teams = [...new Set(listed.map((e) => e.team))];
+    const isOpen = (t) => sh.open[t] ?? listed.length <= 20;
+    const anyOpen = teams.some(isOpen);
+    let html = `<div class="ge-panel-head"><button class="org-chk" data-act="gAll" aria-label="Выбрать всех">${boxHTML(st)}</button><span>Выбрано ${people(sh.members.length)}</span>${teams.length > 1 ? `<button class="ge-fold" data-act="gFoldAll">${anyOpen ? "Свернуть все" : "Развернуть все"}</button>` : ""}<button class="g-more" data-act="gClear" aria-label="Очистить список">${BIN_I}</button></div>`;
+    if (sh.confirmClear) html += `<div class="ge-big"><span>Убрать всех из списка? Выбранные сотрудники не попадут в группу.</span><div class="g-menu"><button class="btn sec sm" data-act="gClearNo">Отмена</button><button class="btn sm danger-fill" data-act="gClearYes">Убрать</button></div></div>`;
     if (!listed.length) return html + `<div class="ge-empty">Пока никого. Добавь людей по подразделению или поиском.</div>`;
-    for (const t of [...new Set(listed.map((e) => e.team))]) {
-      html += `<div class="sh-sep">${esc(t)}</div>` + listed.filter((e) => e.team === t).map((e) => empRow(e, sh)).join("");
+    const CHEV_D = `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 7.5l5 5 5-5" stroke="#717171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    for (const t of teams) {
+      const ids = listed.filter((e) => e.team === t).map((e) => e.id), k = ids.filter((id) => sh.members.includes(id)).length, open = isOpen(t);
+      html += `<div class="ge-team${open ? " open" : ""}"><button class="org-chk" data-act="gTeamAll" data-v="${esc(t)}" aria-label="Выбрать всех: ${esc(t)}">${boxHTML(triState(ids, sh.members))}</button><button class="ge-team-tg" data-act="gTeamTg" data-v="${esc(t)}" aria-expanded="${open}"><span>${esc(t)}</span><small>${k} из ${ids.length}</small>${CHEV_D}</button></div>`;
+      if (open) html += `<div class="ge-team-list">${listed.filter((e) => e.team === t).map((e) => empRow(e, sh)).join("")}</div>`;
     }
     return html;
   }
@@ -1393,7 +1418,15 @@ function geditBar(sh) {
 }
 // Новый экран группы: по умолчанию таб «По подразделению», как на десктопе.
 // Таб «По подразделению» открывается там, где человек остановился в прошлый раз (S.lastOrgPath).
-const geditState = (id, name, members, back) => ({ kind: "gedit", id, name, members: [...members], listed: [...members], q: "", err: "", tab: "org", path: [...(S.lastOrgPath || [])], panel: false, back });
+const geditState = (id, name, members, back) => ({ kind: "gedit", id, name, members: [...members], listed: [...members], q: "", err: "", tab: "org", path: [...(S.lastOrgPath || [])], panel: false, open: {}, back, init: { name, members: [...members] } });
+// Есть ли несохранённые изменения: название или состав отличаются от исходных.
+const geditDirty = (sh) => sh.name.trim() !== sh.init.name.trim() || sh.members.length !== sh.init.members.length || sh.members.some((id) => !sh.init.members.includes(id));
+function geditClose() {
+  const sh = S.sheet;
+  if (sh.panel) { sh.panel = false; return; }
+  if (geditDirty(sh)) { sh.confirmExit = true; return; }
+  S.sheet = sh.back || null;
+}
 function geditRefresh() {
   if (S.sheet?.kind !== "gedit") return;
   const b = document.getElementById("ge-body"), bar = document.getElementById("ge-bar");
@@ -1489,14 +1522,20 @@ function sheetHTML() {
     // «По подразделению / По сотрудникам», панель «Выбрано N человек», «Удалить группу» и «Сохранить».
     const editing = !!sh.id;
     const ph = sh.tab === "org" ? "Поиск по подразделению" : "Поиск по ФИО, табельному или должности";
-    return sheetWrap(`<div class="sh-head"><div class="t"><h2>${editing ? "Редактирование группы" : "Добавление новой группы"}</h2></div><button class="x" data-act="geBack" aria-label="Закрыть">${X}</button></div>
+    // В списке выбранных — «‹ Назад» к выбору (это не выход из экрана); крестик — только на основном экране.
+    const headHTML = sh.panel
+      ? `<div class="sh-head ge-panel-top"><button class="x" data-act="gePanel" aria-label="Назад к выбору">${ARR(-1)}</button><div class="t"><h2>Выбранные сотрудники</h2></div></div>`
+      : `<div class="sh-head"><div class="t"><h2>${editing ? "Редактирование группы" : "Добавление новой группы"}</h2></div><button class="x" data-act="geBack" aria-label="Закрыть">${X}</button></div>`;
+    // Выход с несохранёнными изменениями — сначала спросить.
+    const exitDlg = sh.confirmExit ? `<div class="ge-dlg-scrim"><div class="ge-dlg" role="alertdialog" aria-labelledby="ge-dlg-t"><h3 id="ge-dlg-t">Выйти без сохранения?</h3><p>${editing ? "Изменения в группе не сохранятся." : "Название и выбранные сотрудники не сохранятся."}</p><div class="g-menu"><button class="btn sec sm" data-act="exitStay">Остаться</button><button class="btn sm danger-fill" data-act="exitLeave">Выйти</button></div></div></div>` : "";
+    return sheetWrap(`${headHTML}
       ${sh.panel ? "" : `<div class="ge-name${sh.err ? " err" : ""}" id="ge-namebox"><label for="ge-name">Название группы</label><input id="ge-name" value="${esc(sh.name)}" placeholder="Например, мои ассистенты" maxlength="40" autocomplete="off"><div class="ge-err" id="ge-err">${sh.err ? esc(sh.err) : ""}</div></div>
       <div class="ge-add"><span class="ge-lbl">Добавить сотрудников</span><div class="seg ge-seg"><button class="${sh.tab === "org" ? "on" : ""}" data-act="geTab" data-v="org">По подразделению</button><button class="${sh.tab === "emp" ? "on" : ""}" data-act="geTab" data-v="emp">По сотрудникам</button></div>
       <div class="s-input"><img src="assets/left-icon.svg" width="16" height="16" alt=""><input id="ge-q" type="search" placeholder="${ph}" value="${esc(sh.q)}" autocomplete="off"></div></div>`}
       <div class="sh-body" id="ge-body">${geditBody(sh)}</div>
       ${sh.panel ? "" : `<div id="ge-bar">${geditBar(sh)}</div>`}
       <div class="sh-foot ge-foot">${sh.panel ? `<button class="btn" data-act="gePanel">Готово</button>`
-        : `${editing ? `<button class="btn sec" data-act="gAskDelEdit">Удалить группу</button>` : ""}<button class="btn" data-act="gSave">Сохранить</button>`}</div>`, { screen: true });
+        : `${editing ? `<button class="btn sec" data-act="gAskDelEdit">Удалить группу</button>` : ""}<button class="btn" data-act="gSave">Сохранить</button>`}</div>${exitDlg}`, { screen: true });
   }
   if (sh.kind === "addto") {
     const e = byId(sh.e), custom = S.data.groups.filter((g) => g.kind === "custom");
@@ -1747,7 +1786,24 @@ phone.addEventListener("click", (ev) => {
       return;
     }
     case "gAll": { const sh = S.sheet; sh.members = sh.listed.every((id) => sh.members.includes(id)) ? [] : [...sh.listed]; geditRefresh(); return; }
-    case "gClear": S.sheet.members = []; S.sheet.listed = []; geditRefresh(); return;
+    case "gClear": if (S.sheet.listed.length) { S.sheet.confirmClear = true; geditRefresh(); } return;
+    case "gClearNo": S.sheet.confirmClear = false; geditRefresh(); return;
+    case "gClearYes": S.sheet.members = []; S.sheet.listed = []; S.sheet.confirmClear = false; geditRefresh(); return;
+    case "gTeamTg": { const sh = S.sheet, listed = sh.listed.map(byId).filter(Boolean); sh.open[v] = !(sh.open[v] ?? listed.length <= 20); geditRefresh(); return; }
+    case "gTeamAll": {
+      const sh = S.sheet, ids = sh.listed.filter((id) => byId(id)?.team === v);
+      const all = ids.every((id) => sh.members.includes(id));
+      sh.members = all ? sh.members.filter((id) => !ids.includes(id)) : [...new Set([...sh.members, ...ids])];
+      geditRefresh(); return;
+    }
+    case "gFoldAll": {
+      const sh = S.sheet, listed = sh.listed.map(byId).filter(Boolean), teams = [...new Set(listed.map((e) => e.team))];
+      const anyOpen = teams.some((t) => sh.open[t] ?? listed.length <= 20);
+      for (const t of teams) sh.open[t] = !anyOpen;
+      geditRefresh(); return;
+    }
+    case "exitStay": S.sheet.confirmExit = false; break;
+    case "exitLeave": S.sheet = S.sheet.back || null; break;
     case "gAskDel": S.sheet.confirm = v; break;
     case "gCancelDel": S.sheet.confirm = null; S.sheet.menu = null; break;
     case "gDel": {
@@ -1760,7 +1816,7 @@ phone.addEventListener("click", (ev) => {
       break;
     }
     case "gAskDelEdit": S.sheet = { ...S.sheet.back, kind: "groups", draft: S.sheet.back?.draft ?? [...S.data.selected], menu: S.sheet.id, confirm: S.sheet.id }; break;
-    case "geBack": S.sheet = S.sheet.back || null; break;
+    case "geBack": geditClose(); break;
     case "gPick": {
       const sh = S.sheet, id = el.dataset.e;
       sh.members = sh.members.includes(id) ? sh.members.filter((x) => x !== id) : [...sh.members, id];
@@ -1883,7 +1939,7 @@ phone.addEventListener("pointerdown", (ev) => {
 });
 ["pointerup", "pointerleave", "pointercancel"].forEach((t) => phone.addEventListener(t, () => clearTimeout(lpTimer)));
 document.addEventListener("keydown", (ev) => {
-  if (ev.key === "Escape" && S.sheet) { S.sheet = null; render(); }
+  if (ev.key === "Escape" && S.sheet) { if (S.sheet.kind === "gedit") geditClose(); else S.sheet = null; render(); }
   if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key.toLowerCase() === "s") { ev.preventDefault(); S.sheet = { kind: "scenario" }; render(); }
 });
 
