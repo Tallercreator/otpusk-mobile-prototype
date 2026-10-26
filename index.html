@@ -144,6 +144,8 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .p-main.ovl .gscroll { position: relative; z-index: 1; border-radius: 0; clip-path: inset(var(--wt, 0px) 0 0 0 round 16px 16px 0 0); }
 .p-main.ovl .g-sticky { top: var(--st, 0px); }
 .p-main.ovl > .p-body > .pnav { position: relative; z-index: 2; }
+/* Пустые состояния лежат над белой подложкой карточки, иначе её ::before их закрывает */
+.p-main.ovl > .p-body > .empty { position: relative; z-index: 1; }
 .phone.imp .p-main .ctl-fold { opacity: var(--fo, 1); }
 .row { display: flex; gap: 8px; align-items: center; }
 .field { flex: 1; min-width: 0; height: 40px; border-radius: 12px; background: var(--p-field); display: flex; align-items: center; gap: 8px; padding: 0 12px; color: var(--p-ter); text-align: left; }
@@ -290,8 +292,9 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .g-row.nn-lane { margin-top: 16px; position: relative; }
 .g-row.nn-lane .g-track { height: 32px; border-radius: 8px; background: var(--p-alpha); }
 .g-row.nn-lane .bar { top: 4px; }
-.pnav { position: relative; z-index: 2; flex: none; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; border-top: 1px solid #eef0f2; background: var(--p-white); }
-.pnav .arr { width: 40px; height: 40px; display: grid; place-items: center; }
+.pnav { position: relative; z-index: 2; flex: none; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-top: 1px solid #eef0f2; background: var(--p-white); }
+.pnav .arr { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--p-field); flex: none; }
+.pnav .arr:active { background: #dfe2e6; }
 .pn-mid { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .pnav .cur { white-space: nowrap; }
 .pn-mid:has(.pn-today) .cur { font-size: 13px; gap: 4px; padding: 0 4px; }
@@ -396,9 +399,12 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .scrim { position: absolute; inset: 0; background: rgba(20,20,22,.45); z-index: 20; }
 .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--p-white); border-radius: 24px 24px 0 0; padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 16px; max-height: calc(100% - 40px); }
 .sheet.full { top: 40px; }
-.ge-foot .btn { white-space: nowrap; }
-.ge-foot .btn.sec { flex: none; padding: 0 16px; }
+/* Кнопки внизу шторок — в одну строку; второстепенная по ширине текста, главная занимает остальное */
+.sh-foot .btn { white-space: nowrap; }
+.sh-foot .btn.sec { flex: none; padding: 0 18px; }
 .sheet.screen { top: 0; max-height: none; border-radius: 0; padding-top: 38px; }
+/* В полноэкранной шторке список занимает всю высоту, кнопки всегда прижаты к низу */
+.sheet.screen .sh-body, .sheet.full .sh-body { flex: 1; }
 @media (max-width: 430px) { .device .sheet.screen { padding-top: 16px; } }
 .anim .scrim { animation: fade .2s ease; }
 .anim .sheet { animation: up .26s cubic-bezier(.2,.8,.2,1); }
@@ -421,14 +427,22 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .opt { height: 40px; border-radius: 8px; background: var(--p-alpha2); font-size: 14px; font-weight: 500; }
 .opt.on { background: var(--p-field); box-shadow: inset 0 0 0 1.5px var(--p-ink); }
 .opt.wide { grid-column: 1 / -1; }
-.chk-row { display: flex; align-items: center; gap: 12px; min-height: 48px; text-align: left; width: 100%; }
-.chk-row .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.chk-row .txt small { font-size: 11px; line-height: 13px; color: var(--p-ter); }
-.chk-row .txt b { font-weight: 500; font-size: 15px; line-height: 20px; }
+/* Единая строка списка во всех шторках: галочка слева 24, заголовок 15/20, подпись 12/16, высота от 56, разделитель */
+.chk-row, .res, .org-row { min-height: 56px; border-bottom: 1px solid #f0f1f3; }
+.chk-row { display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; padding: 8px 0; }
+.chk-row .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.res-tag { flex: none; font-size: 11px; line-height: 14px; color: var(--p-ter); background: var(--p-alpha2); border-radius: 6px; padding: 3px 6px; }
+.res .txt small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chk-row .txt small, .res small, .org-open small { font-size: 12px; line-height: 16px; color: var(--p-ter); }
+.chk-row .txt b, .res .nm, .org-open b { font-weight: 500; font-size: 15px; line-height: 20px; }
+.sh-body > .chk-row:last-of-type, .sh-body > .res:last-of-type, .sh-body > .org-row:last-of-type { border-bottom: 0; }
+.g-item .chk-row { border-bottom: 0; }
+.g-item { border-bottom: 1px solid #f0f1f3; }
+.g-item.open { border-bottom-color: transparent; }
 .box { width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid #d0d3d8; flex: none; display: grid; place-items: center; }
 .box.on { background: var(--c-annual); border-color: var(--c-annual); }
 .box.dis { opacity: .4; }
-.leg { display: flex; align-items: center; gap: 12px; min-height: 44px; text-align: left; width: 100%; border-radius: 12px; padding: 0 8px; margin: 0 -8px; }
+.leg { display: flex; align-items: center; gap: 12px; min-height: 52px; border-bottom: 1px solid #f0f1f3; text-align: left; width: 100%; border-radius: 12px; padding: 0 8px; margin: 0 -8px; }
 .leg.on { background: var(--p-alpha2); }
 .leg .txt { flex: 1; font-size: 15px; line-height: 20px; }
 .sh-sep { font-size: 12px; color: var(--p-ter); text-transform: uppercase; letter-spacing: .4px; margin-top: 8px; }
@@ -453,7 +467,7 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .g-item { border-radius: 12px; transition: background .15s; }
 .g-item.open { background: var(--p-alpha2); padding-bottom: 10px; }
 .g-line { display: flex; align-items: center; gap: 4px; }
-.g-line .chk-row { flex: 1; min-width: 0; padding-left: 4px; }
+.g-line .chk-row { flex: 1; min-width: 0; }
 .g-more, .g-lock { width: 40px; height: 40px; display: grid; place-items: center; flex: none; border-radius: 10px; }
 .g-more:active { background: var(--p-field); }
 .g-menu { display: flex; gap: 8px; padding: 0 8px; }
@@ -461,7 +475,7 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .btn.danger { color: #c62f3d; }
 .btn.danger-fill { background: #d93545; color: #fff; }
 .g-confirm { display: flex; flex-direction: column; gap: 10px; padding: 2px 8px 0; font-size: 13px; line-height: 17px; color: var(--p-sec); }
-.g-new { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 4px; font-weight: 500; text-align: left; width: 100%; }
+.g-new { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0; font-weight: 500; text-align: left; width: 100%; }
 .g-plus { width: 24px; height: 24px; border-radius: 7px; background: var(--p-lime); display: grid; place-items: center; flex: none; }
 .ge-name { display: flex; flex-direction: column; gap: 6px; flex: none; }
 .ge-name label { font-size: 12px; color: var(--p-ter); }
@@ -474,13 +488,12 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .ge-lbl { font-size: 12px; color: var(--p-ter); }
 .ge-seg { padding: 3px; border-radius: 12px; }
 .ge-seg button { height: 34px; border-radius: 10px; font-size: 14px; }
-.org-row { display: flex; align-items: center; gap: 4px; min-height: 52px; border-bottom: 1px solid #f0f1f3; }
-.org-chk { width: 40px; height: 44px; display: grid; place-items: center; flex: none; }
-.org-chk.wide { width: auto; display: flex; gap: 12px; padding-left: 8px; font-size: 14px; color: var(--p-sec); }
-.org-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; text-align: left; min-height: 52px; }
+.org-row { display: flex; align-items: center; gap: 4px; }
+.org-chk { width: 36px; height: 44px; display: flex; align-items: center; justify-content: flex-start; flex: none; }
+.org-chk.wide { width: auto; display: flex; gap: 12px; font-size: 15px; color: var(--p-ink); font-weight: 500; }
+.org-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; text-align: left; min-height: 56px; padding: 8px 0; }
 .org-open .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.org-open b { font-weight: 500; font-size: 15px; line-height: 19px; }
-.org-open small { font-size: 12px; color: var(--p-ter); }
+
 .crumbs { display: flex; align-items: center; gap: 2px; flex-wrap: nowrap; overflow: hidden; min-height: 32px; }
 .crumbs.open { flex-wrap: wrap; row-gap: 4px; }
 .crumb { height: 28px; padding: 0 8px; border-radius: 8px; background: var(--p-alpha2); font-size: 13px; color: var(--p-sec); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; flex: none; }
@@ -519,9 +532,9 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 /* Поиск */
 .s-input { height: 44px; border-radius: 12px; background: var(--p-field); display: flex; align-items: center; gap: 8px; padding: 0 12px; flex: none; }
 .s-input input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 16px; color: var(--p-ink); outline: none; }
-.res { display: flex; gap: 10px; align-items: center; padding: 10px 4px; text-align: left; width: 100%; border-bottom: 1px solid #f0f1f3; }
+.res { display: flex; gap: 12px; align-items: center; padding: 8px 0; text-align: left; width: 100%; }
 .res .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.res small { font-size: 12px; color: var(--p-ter); }
+
 .res mark { background: #eaffb0; color: inherit; border-radius: 3px; }
 .toast { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 30; background: var(--p-ink); color: #fff; border-radius: 12px; padding: 12px 14px; font-size: 13px; animation: up .2s ease; }
 .my-ph { flex: 1; margin: 16px 12px; border-radius: 16px; border: 1.5px dashed #d0d3d8; display: grid; place-items: center; color: var(--p-ter); }
@@ -541,8 +554,8 @@ html.app-only body { padding: 0; background: #f3f4f6; }
 .app-only .p-nav { padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); border-radius: 12px 12px 0 0; }
 @media (min-width: 481px) { .app-only .device { box-shadow: 0 0 0 1px #e3e6ea; } }
 /* Шторки не заходят под вырез и статус-бар телефона */
-.app-only .sheet { max-height: calc(100% - 40px - env(safe-area-inset-top, 0px)); }
-.app-only .sheet.full { top: calc(16px + env(safe-area-inset-top, 0px)); }
+.app-only .sheet { max-height: calc(100% - 40px - env(safe-area-inset-top, 0px)); padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+.app-only .sheet.full { top: calc(16px + env(safe-area-inset-top, 0px)); max-height: none; }
 .app-only .sheet.screen { top: 0; max-height: none; padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
 </style>
 
@@ -1431,7 +1444,7 @@ function sheetHTML() {
   }
   if (sh.kind === "display") {
     const v = S.improved ? S : sh.draft;
-    const r = (key, title, sub) => `<button class="chk-row" data-act="dtoggle" data-v="${key}"><span class="txt"><b>${title}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="box${v[key] ? " on" : ""}">${v[key] ? CHECK : ""}</span></button>`;
+    const r = (key, title, sub) => `<button class="chk-row" data-act="dtoggle" data-v="${key}"><span class="box${v[key] ? " on" : ""}">${v[key] ? CHECK : ""}</span><span class="txt"><b>${title}</b>${sub ? `<small>${sub}</small>` : ""}</span></button>`;
     const rows = r("showOverlaps", "Показать пересечения", "Число отсутствующих на каждый день") + r("groupByTeam", "Группировать по командам", "Мой график и выбранные группы") + r("hideLongTerm", "Скрыть длительные отсутствия", "Декрет, учебный отпуск и т. п.");
     if (!S.improved) {
       return sheetWrap(`${head("Отображение")}<div class="sh-body">${rows}</div>
@@ -1518,8 +1531,8 @@ function sheetHTML() {
       <div class="sh-body" id="res" style="gap:0">${searchResults(sh.q)}</div>`, { full: true });
   }
   if (sh.kind === "scenario") {
-    const ver = (imp, t, d) => `<button class="chk-row" data-act="setver" data-v="${imp ? "imp" : "mock"}"><span class="txt"><b>${t}</b><small>${d}</small></span><span class="box${S.improved === imp ? " on" : ""}">${S.improved === imp ? CHECK : ""}</span></button>`;
-    return sheetWrap(`${head("Панель модератора", "Сценарий тестовых данных и версия")}<div class="sh-body">${SCENARIOS.map(([id, t, d]) => `<button class="chk-row" data-act="scen" data-v="${id}"><span class="txt"><b>${t}</b><small>${d}</small></span><span class="box${S.scenario === id ? " on" : ""}">${S.scenario === id ? CHECK : ""}</span></button>`).join("")}
+    const ver = (imp, t, d) => `<button class="chk-row" data-act="setver" data-v="${imp ? "imp" : "mock"}"><span class="box${S.improved === imp ? " on" : ""}">${S.improved === imp ? CHECK : ""}</span><span class="txt"><b>${t}</b><small>${d}</small></span></button>`;
+    return sheetWrap(`${head("Панель модератора", "Сценарий тестовых данных и версия")}<div class="sh-body">${SCENARIOS.map(([id, t, d]) => `<button class="chk-row" data-act="scen" data-v="${id}"><span class="box${S.scenario === id ? " on" : ""}">${S.scenario === id ? CHECK : ""}</span><span class="txt"><b>${t}</b><small>${d}</small></span></button>`).join("")}
       <div class="sh-sep">Версия</div>${ver(false, "Как в макете", "Экраны из Figma")}${ver(true, "С улучшениями", "Предложения по UX/UI")}</div>`);
   }
   return "";
@@ -1534,7 +1547,7 @@ function searchResults(q) {
   return res.map((e) => {
     const i = norm(e.fullName).indexOf(n);
     const name = esc(e.fullName.slice(0, i)) + "<mark>" + esc(e.fullName.slice(i, i + n.length)) + "</mark>" + esc(e.fullName.slice(i + n.length));
-    return `<button class="res" data-act="pick" data-e="${e.id}">${AVA(e)}<span class="txt"><span class="nm">${name}</span><small>${esc(e.position)} · ${e.personnelNumber}${vis.has(e.id) ? "" : " · не в выбранных группах"}</small></span></button>`;
+    return `<button class="res" data-act="pick" data-e="${e.id}">${AVA(e)}<span class="txt"><span class="nm">${name}</span><small>${esc(e.position)} · ${e.personnelNumber}</small></span>${vis.has(e.id) ? "" : `<span class="res-tag">вне групп</span>`}</button>`;
   }).join("");
 }
 
