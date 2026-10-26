@@ -327,6 +327,10 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 /* Угол сетки — подпись периода (без стрелок) */
 .g-head .nav-corner { flex-direction: row; align-items: center; justify-content: space-between; gap: 4px; margin-left: 0; width: var(--nw); text-align: left; }
 .nav-corner .nc-mid { flex: 1; min-width: 0; align-items: flex-start; text-align: left; }
+.nc-cap { font-size: 12px; line-height: 14px; color: var(--p-ter); padding-left: 4px; white-space: nowrap; }
+.pnav .cur { gap: 8px; }
+.pnav .cur img { flex: none; }
+.pn-txt { align-items: flex-start; }
 .nc-hide { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 8px; background: var(--p-alpha2); }
 .nc-hide:active { background: var(--p-field); }
 .nav-corner .nc-main { padding: 0; font-size: 14px; }
@@ -543,8 +547,8 @@ img { max-width: 100%; }
       </div></div>
       <div class="imp"><div class="num">07</div><div>
         <h3>Один вход в выбор периода</h3>
-        <p>В версии «Как в макете» иконка календаря у поиска открывает шторку «Периоды» (неделя, месяц, год или «Выбрать период»), и туда же ведёт тап по датам в углу сетки. В улучшенной версии период выбирается тапом по его названию, а иконка у поиска переключает «Сетка / Список».</p>
-        <div class="meta"><span class="tag imp-only">только «С улучшениями»</span></div>
+        <p>В макете шторка «Периоды» открывалась из двух мест: иконкой календаря у поиска и из подписи периода. Теперь вход один, в нижней панели: иконка календаря рядом с «Август 2026». Иконка сама показывает, что период можно выбрать, поэтому стрелка «⌄» не нужна. Поиск сверху занимает всю ширину, а в углу сетки вместо дубля подписи периода стоит заголовок колонки «ФИО» с кнопкой «‹‹».</p>
+        <div class="meta"><span class="tag">в обеих версиях</span></div>
       </div></div>
       <div class="imp"><div class="num">08</div><div>
         <h3>Шторка наложения со списком разных людей</h3>
@@ -896,7 +900,7 @@ function controlsHTML() {
       <button class="field" data-act="search"><img src="assets/left-icon.svg" width="16" height="16" alt=""><span class="lbl">Поиск по ФИО сотрудника</span></button>
       ${S.improved
         ? `<button class="sq" data-act="view" aria-label="${S.view === "grid" ? "Показать списком" : "Показать сеткой"}">${S.view === "grid" ? LIST_I : GRID_I}</button>`
-        : `<button class="sq" data-act="periods" aria-label="Выбрать период"><img src="assets/calendar.svg" width="24" height="24" alt=""></button>`}
+        : ""}
     </div>
     <div class="row"><button class="field groups" data-act="groups"><span class="lbl">${esc(groupsLabel())}</span>${CHEV}</button></div>`;
   const disp = `<button class="pill" data-act="display">Отображение${cnt ? ` <span class="count">${cnt}</span>` : ""} ${CHEV12}</button>`;
@@ -935,18 +939,9 @@ function barHTML(a, ds, cw, gap, extraCls = "") {
  * тап по подписи открывает «Периоды», вторая строка — масштаб или «К сегодня»,
  * когда текущая дата ушла из вида.
  */
-/** Угол сетки «Как в макете»: подпись видимого периода (навигация переехала вниз), тап — «Периоды». */
+/** Угол сетки «Как в макете»: заголовок колонки «ФИО» и «‹‹» — скрыть имена. Период — только в нижней панели. */
 function cornerNavHTML() {
-  const ds = visibleDays(), a = ds[0], b = ds[ds.length - 1];
-  let main, sub;
-  if (quarterYear()) { const q = quarterStart(S.anchor); main = `Q${q.getMonth() / 3 + 1}`; sub = `${q.getFullYear()} · Год`; }
-  else {
-    if (S.mode === "month") main = MONTHS[a.getMonth()];
-    else if (a.getMonth() === b.getMonth()) main = `${a.getDate()}–${b.getDate()} ${MONTHS_SH[a.getMonth()]}`;
-    else main = `${a.getDate()} ${MONTHS_SH[a.getMonth()]}–${b.getDate()} ${MONTHS_SH[b.getMonth()]}`;
-    sub = `${b.getFullYear()} · ${{ week: "Неделя", month: "Месяц", range: "Период" }[S.mode]}`;
-  }
-  return `<div class="g-name nav-corner"><button class="nc-mid" data-act="periods" aria-label="Выбрать период"><span class="nc-main">${esc(main)}</span><span class="nc-sub">${sub}</span></button><button class="nc-hide" data-act="collapseNames" aria-label="Скрыть ФИО">${HIDE_I}</button></div>`;
+  return `<div class="g-name nav-corner"><span class="nc-cap">ФИО</span><button class="nc-hide" data-act="collapseNames" aria-label="Скрыть ФИО">${HIDE_I}</button></div>`;
 }
 const isNoNames = () => !S.improved && S.showOverlaps && S.mode !== "year";
 function gridHTML() {
@@ -1144,7 +1139,7 @@ function pnavHTML() {
   const unit = { week: "неделя", month: "месяц", year: quarterYear() ? "квартал" : "год", range: "период" }[S.mode];
   const back = periodHasToday() ? "" : `<button class="pn-today" data-act="today">К сегодня</button>`;
   return `<div class="pnav"><button class="arr" data-act="step" data-v="-1" aria-label="Предыдущий ${unit}">${ARR(-1)}</button>
-    <span class="pn-mid"><button class="cur" data-act="periods" aria-label="Выбрать период: ${esc(label)}"><span class="pn-txt"><b>${esc(label)}</b><small>${sub} ${CHEV12}</small></span></button>${back}</span>
+    <span class="pn-mid"><button class="cur" data-act="periods" aria-label="Выбрать период: ${esc(label)}"><img src="assets/calendar.svg" width="24" height="24" alt=""><span class="pn-txt"><b>${esc(label)}</b><small>${sub}</small></span></button>${back}</span>
     <button class="arr" data-act="step" data-v="1" aria-label="Следующий ${unit}">${ARR(1)}</button></div>`;
 }
 const HIDE_I = `<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M15 4.5L9.5 10l5.5 5.5M10 4.5L4.5 10l5.5 5.5" stroke="#717171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
