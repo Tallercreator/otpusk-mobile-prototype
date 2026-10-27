@@ -6,7 +6,7 @@
 <title>Отпуск · График команды</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400..700&family=Source+Sans+3:wght@600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400..700&family=Source+Sans+3:wght@600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 /* Раскладка: слева телефон 375 с живым прототипом, справа — рабочая тетрадь с улучшениями и аудитом функций. */
 :root {
@@ -556,6 +556,59 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .toast { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 30; background: var(--p-ink); color: #fff; border-radius: 12px; padding: 12px 14px; font-size: 13px; animation: up .2s ease; }
 .my-ph { flex: 1; margin: 16px 12px; border-radius: 16px; border: 1.5px dashed #d0d3d8; display: grid; place-items: center; color: var(--p-ter); }
 
+
+/* ===== Под макет 9457-7034: поля 8, сегмент 40, промежутки 8, карточка r12, строки 28 через 16, панель периода ===== */
+.p-head { height: 64px; gap: 8px; }
+.p-head .title { font-family: "Source Sans 3", "Source Sans Pro", system-ui, sans-serif; font-weight: 700; font-size: 18px; line-height: 22px; color: #151617; letter-spacing: 0; }
+.p-head .icon-btn + .icon-btn, .p-head .icon-btn + .ava-me { margin-left: 8px; }
+.p-tabs { background: transparent; padding: 12px 8px 0; }
+.seg { padding: 4px; gap: 8px; border-radius: 12px; }
+.seg button { height: 32px; border-radius: 8px; font-size: 14px; line-height: 18px; }
+.seg button.on { color: #0d0d0d; box-shadow: none; }
+.p-controls { gap: 8px; padding: 12px 8px; }
+.field { font-size: 14px; font-weight: 500; line-height: 18px; }
+.phone:not(.imp) .pill { font-size: 14px; line-height: 18px; gap: 6px; padding: 0 12px; color: var(--p-ink); }
+.p-body { margin: 0 8px; border-radius: 12px 12px 0 0; }
+.gscroll { padding: 0 8px 24px; border-radius: 12px 12px 0 0; }
+.p-main.ovl > .p-body::before { border-radius: 12px 12px 0 0; }
+.p-main.ovl .gscroll { clip-path: inset(var(--wt, 0px) 0 0 0 round 12px 12px 0 0); }
+.g-row { gap: var(--ng, 8px); }
+.g.auto .g-row > .g-name { margin-right: calc(-1 * var(--vis, var(--nw)) - var(--ng, 8px)); }
+.g.auto .g-row > .g-track { margin-left: calc(var(--nw) + var(--ng, 8px)); }
+.q-cols { left: calc(var(--nw) + var(--ng, 8px)); }
+/* Сетка версии по макету */
+.phone:not(.imp) .dh { height: 28px; padding: 0; gap: 0; justify-content: center; }
+.phone:not(.imp) .dh b { font-size: 14px; line-height: 18px; color: #525252; }
+.phone:not(.imp) .dh.we b, .phone:not(.imp) .dh.we span { color: #ed7126; }
+.phone:not(.imp) .dh.today b { color: #3b5c00; }
+.phone:not(.imp) .dh span { font-size: 10px; line-height: 10px; }
+.phone:not(.imp) .g-row.lane { margin-top: 16px; }
+.phone:not(.imp) .g-row.lane .g-name { height: 28px; gap: 4px; padding-left: 4px; }
+.phone:not(.imp) .g-name { box-shadow: -4px 0 0 8px var(--p-white), 0 0 0 8px var(--p-white), 16px 0 0 0 var(--p-white); }
+.phone:not(.imp) .nm { font-size: 14px; line-height: 18px; font-weight: 500; color: #525252; }
+.phone:not(.imp) .g-row.lane:not(.grp) > .g-track { height: 28px; border-radius: 4px; }
+.phone:not(.imp) .bar { top: 2px; height: 24px; border-radius: 4px; padding: 4px; }
+.phone:not(.imp) .g-cols span { border-radius: 4px; }
+.phone:not(.imp) .grp-chip, .phone:not(.imp) .sub-chip { height: 18px; font-size: 14px; line-height: 18px; font-weight: 500; color: #ababab; padding-left: 4px; }
+.phone:not(.imp) .sub-chip { font-weight: 400; }
+.phone:not(.imp) .hs .g-row.lane.grp, .phone:not(.imp) .hs .g-row.lane:has(> .g-name .sub-chip) { margin-top: 0; padding-top: 24px; padding-bottom: 12px; }
+.phone:not(.imp) .hs .g-row.lane.grp + .g-row, .phone:not(.imp) .hs .g-row.lane:has(> .g-name .sub-chip) + .g-row { margin-top: 0; }
+/* Как в макете 9457-7034: колонки дней идут сквозь подписи групп, начинаются на 16 px ниже шапки дней */
+.phone:not(.imp) .hs .g-row.lane.grp, .phone:not(.imp) .hs .g-row.lane:has(> .g-name .sub-chip) { background: transparent; }
+.phone:not(.imp) .hs > .g > .g-cols { top: 12px; }
+.phone:not(.imp) .hs .g-row.lane.grp .g-name, .phone:not(.imp) .hs .g-row.lane .g-name:has(.sub-chip) { height: 18px; }
+.phone:not(.imp) .hs > .g > .g-row.lane.grp:first-child, .phone:not(.imp) .hs > .g > .g-cols + .g-row.lane.grp { padding-top: 20px; }
+.phone:not(.imp) .g-head .nav-corner { gap: 7px; }
+.phone:not(.imp) .nc-cap { font-size: 14px; line-height: 18px; color: #717171; font-weight: 400; }
+.nc-hide { background: #f3f4f6; }
+/* Панель периода на всю ширину: белая, скругление сверху 12, наезжает на низ карточки; таб бар перекрывает её низ */
+.p-main > .pnav { position: relative; z-index: 6; flex: none; height: auto; margin: -12px 0 -6px; padding: 8px 8px 24px; border-top: 0; border-radius: 12px 12px 0 0; background: var(--p-white); box-shadow: 0 -1px 41px rgba(0,0,0,.04); }
+.pnav .arr { width: 40px; height: 40px; border-radius: 12px; background: #f3f4f6; }
+.pnav .cur { height: 40px; padding: 0 12px; gap: 6px; border-radius: 12px; background: transparent; font-size: 16px; line-height: 20px; font-weight: 500; color: #222; }
+.pnav .cur:active { background: #f3f4f6; }
+.pn-lbl { white-space: nowrap; }
+.app-only .p-main > .pnav { padding-bottom: 24px; }
+
 /* ===== Режим «только приложение» (сборка для GitHub Pages, класс app-only на <html>):
    прототип на весь экран, как на проде — без рамки телефона, переключателя версий и заметок. ===== */
 html.app-only, html.app-only body { height: 100%; overflow: hidden; overscroll-behavior: none; }
@@ -1043,21 +1096,23 @@ function barHTML(a, ds, cw, gap, extraCls = "") {
  */
 /** Угол сетки «Как в макете»: заголовок колонки «ФИО» и «‹‹» — скрыть имена. Период — только в нижней панели. */
 function cornerNavHTML() {
-  return `<div class="g-name nav-corner"><button class="nc-hide" data-act="collapseNames" aria-label="Скрыть ФИО">${HIDE_I}</button><span class="nc-cap">ФИО</span></div>`;
+  return `<div class="g-name nav-corner"><button class="nc-hide" data-act="collapseNames" aria-label="Свернуть ФИО">${HIDE_I}</button><span class="nc-cap">Свернуть</span></div>`;
 }
 const isNoNames = () => !S.improved && S.showOverlaps && S.mode !== "year";
 function gridHTML() {
   const ds = visibleDays();
-  const gap = 4;
-  const bodyW = Math.min(phone.clientWidth, 400) - 24 - 24;
+  // Макет 9457-7034: колонки дней 34 через 2, от ФИО до дат 16; поля карточки 8 + 8 по бокам.
+  const bodyW = Math.min(phone.clientWidth, 400) - 32;
   // Макет 9447-16040: при включённых пересечениях колонки ФИО нет, дни — сквозные колонки ~45 px.
   const noNames = isNoNames();
   const compact = compactNames();
   const nw = S.improved || noNames ? 0 : compact ? 36 : 150;
-  let cw = noNames ? 45 : 32;
-  if (S.mode === "week" || fitsCompact()) cw = Math.max(32, Math.floor((bodyW - (nw ? nw + 8 : 0) + gap) / ds.length) - gap);
+  const ng = S.improved || noNames ? 8 : 16;
+  const gap = S.improved || noNames ? 4 : 2;
+  let cw = noNames ? 45 : S.improved ? 32 : 34;
+  if (S.mode === "week" || fitsCompact()) cw = Math.max(32, Math.floor((bodyW - (nw ? nw + ng : 0) + gap) / ds.length) - gap);
   const tw = ds.length * (cw + gap) - gap;
-  const vars = `--cw:${cw}px;--gap:${gap}px;--tw:${tw}px;--nw:${nw}px`;
+  const vars = `--cw:${cw}px;--gap:${gap}px;--tw:${tw}px;--nw:${nw}px;--ng:${ng}px`;
   const cells = (cls = "") => ds.map((d) => `<span class="cell${isOff(d) ? " we" : ""}${same(d, TODAY) ? " today" : ""}${cls}"></span>`).join("");
   const [lbl, sub] = periodLabel();
   const list = uniqueVisible();
@@ -1095,7 +1150,7 @@ function gridHTML() {
     return `<div class="g-row lane${idle ? " idle" : ""}${S.flashId === e.id ? " flash" : ""}" data-row="${e.id}"><button class="g-name" data-act="card" data-e="${e.id}" aria-label="${esc(e.fullName)}">${nm}</button>${track}</div>`;
   };
   // Дни — сквозные колонки на всю высоту графика (во всех режимах); в макете начинаются после колонки ФИО.
-  html += `<div class="g-cols"${nw ? ` style="left:${nw + 8}px"` : ""}>${ds.map((d) => `<span class="${isOff(d) ? "we" : ""}${same(d, TODAY) ? " today" : ""}"></span>`).join("")}</div>`;
+  html += `<div class="g-cols"${nw ? ` style="left:${nw + ng}px"` : ""}>${ds.map((d) => `<span class="${isOff(d) ? "we" : ""}${same(d, TODAY) ? " today" : ""}"></span>`).join("")}</div>`;
   if (noNames) {
     // Без ФИО: одна дорожка на человека (без дублей между группами), кто это — по тапу на полосу.
     for (const e of uniqueVisible()) {
@@ -1187,12 +1242,12 @@ function quarterHTML() {
     return { m, last, mx, peak, heat: share >= HEAT.risk ? " risk" : share >= HEAT.attention ? " warn" : "" };
   });
   // Колонка ФИО у года уже, чем у месяца: трём месяцам нужно ≥ 48 px каждому.
-  const bodyW = Math.min(phone.clientWidth, 400) - 48, gap = 4;
+  const bodyW = Math.min(phone.clientWidth, 400) - 32, gap = 4, ng = 16;
   const compact = compactNames();
-  const nw = compact ? 36 : Math.max(112, Math.min(150, bodyW - 8 - 2 * gap - 3 * 56));
-  const mw = Math.floor((bodyW - nw - 8 - 2 * gap) / 3);
+  const nw = compact ? 36 : Math.max(112, Math.min(150, bodyW - ng - 2 * gap - 3 * 56));
+  const mw = Math.floor((bodyW - nw - ng - 2 * gap) / 3);
   const mName = (m) => (mw >= 62 ? MONTHS[m.getMonth()] : MONTHS[m.getMonth()].slice(0, 3));
-  const vars = `--nw:${nw}px;--mw:${mw}px;--gap:${gap}px`;
+  const vars = `--nw:${nw}px;--mw:${mw}px;--gap:${gap}px;--ng:${ng}px`;
   const isCur = (m) => m.getMonth() === TODAY.getMonth() && m.getFullYear() === TODAY.getFullYear();
 
   let html = `<div class="g qy${compact ? " compact" : nw < 130 ? " tight" : ""}" style="${vars}"><div class="g-sticky">
@@ -1234,22 +1289,25 @@ function quarterHTML() {
 
 // Макет 9447-16040: внизу карточки — навигация «‹ 3.08.26 - 9.08.26 ⌄ ›»; там же «К сегодня».
 // Нижняя панель периода: ‹ › листают на шаг масштаба, тап по названию — «Периоды», «К сегодня» — когда сегодня не в кадре.
+// Макет 9457-7034: «‹» · «Август ⌄» · «›» — месяц без года, если год текущий.
 function pnavHTML() {
-  let label, sub;
-  if (quarterYear()) { const q = quarterStart(S.anchor); label = `Q${q.getMonth() / 3 + 1} ${q.getFullYear()}`; sub = "Год"; }
-  else [label, sub] = periodLabel();
+  let label;
+  if (quarterYear()) { const q = quarterStart(S.anchor); label = `Q${q.getMonth() / 3 + 1} ${q.getFullYear()}`; }
+  else if (S.mode === "month") label = MONTHS[S.anchor.getMonth()] + (S.anchor.getFullYear() === TODAY.getFullYear() ? "" : ` ${S.anchor.getFullYear()}`);
+  else label = periodLabel()[0];
   const unit = { week: "неделя", month: "месяц", year: quarterYear() ? "квартал" : "год", range: "период" }[S.mode];
   const back = periodHasToday() ? "" : `<button class="pn-today" data-act="today">К сегодня</button>`;
-  return `<div class="pnav"><button class="arr" data-act="step" data-v="-1" aria-label="Предыдущий ${unit}">${ARR(-1)}</button>
-    <span class="pn-mid"><button class="cur" data-act="periods" aria-label="Выбрать период: ${esc(label)}"><img src="assets/calendar.svg" width="24" height="24" alt=""><span class="pn-txt"><b>${esc(label)}</b><small>${sub}</small></span></button>${back}</span>
-    <button class="arr" data-act="step" data-v="1" aria-label="Следующий ${unit}">${ARR(1)}</button></div>`;
+  return `<div class="pnav"><button class="arr" data-act="step" data-v="-1" aria-label="Предыдущий ${unit}"><img src="assets/chevron-left-24.svg" width="24" height="24" alt=""></button>
+    <span class="pn-mid"><button class="cur" data-act="periods" aria-label="Выбрать период: ${esc(label)}"><span class="pn-lbl">${esc(label)}</span><img src="assets/chevron-down-24.svg" width="24" height="24" alt=""></button>${back}</span>
+    <button class="arr" data-act="step" data-v="1" aria-label="Следующий ${unit}"><img src="assets/chevron-right-24.svg" width="24" height="24" alt=""></button></div>`;
 }
 const LOCK_I = `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4.5" y="9" width="11" height="8" rx="2" stroke="#ababab" stroke-width="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="#ababab" stroke-width="1.5"/></svg>`;
 const DOTS_I = `<svg width="20" height="20" viewBox="0 0 20 20" fill="#525252"><circle cx="4.5" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="15.5" cy="10" r="1.6"/></svg>`;
 const PLUS_I = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#222" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 const XS_I = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="#717171" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-const HIDE_I = `<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M15 4.5L9.5 10l5.5 5.5M10 4.5L4.5 10l5.5 5.5" stroke="#717171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const SHOW_I = `<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 4.5L10.5 10 5 15.5M10 4.5L15.5 10 10 15.5" stroke="#717171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const HIDE_I = `<img src="assets/chevron-double-left-16.svg" width="16" height="16" alt="">`;
+// «Развернуть» — та же иконка из макета, отражённая по горизонтали.
+const SHOW_I = `<img src="assets/chevron-double-left-16.svg" width="16" height="16" alt="" style="transform:scaleX(-1)">`;
 // Кнопка ФИО — одна и та же серая 32×32 у левого края угла в обоих состояниях; меняется только направление стрелок.
 const AUTO_EXPAND_BTN = `<div class="g-name nc-expand auto-x"><button class="nc-hide" data-act="unscroll" aria-label="Показать ФИО">${SHOW_I}</button></div>`;
 const EXPAND_BTN = `<div class="g-name nc-expand"><button class="nc-hide" data-act="expandNames" aria-label="Показать ФИО">${SHOW_I}</button></div>`;
@@ -1263,8 +1321,8 @@ function bodyHTML() {
   else if (S.improved && S.view === "list") inner = `<div class="gscroll" id="gs">${listHTML()}</div>`;
   else inner = `<div class="gscroll" id="gs">${gridHTML()}</div>`;
   // Выбор периода всегда внизу — в зоне большого пальца, над таб баром.
-  if (S.data.selected.length) inner += pnavHTML();
-  return `<div class="p-body">${inner}</div>`;
+  // Нижняя панель периода — на всю ширину экрана, поверх низа карточки (как в макете 9457-7034).
+  return `<div class="p-body">${inner}</div>${S.data.selected.length ? pnavHTML() : ""}`;
 }
 
 // Таб бар приложения (макет 9450-23584): «Отпуск» — текущий раздел, остальные вне прототипа.
