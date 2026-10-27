@@ -687,6 +687,11 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .cd.today::after { top: 30px; bottom: auto; width: 10px; height: 2px; border-radius: 2px; }
 .cd.end { border-radius: 8px; }
 .cd.we.end { color: #fff; }
+/* space-ui-kit Calendar: выходные — orange-intense #ed7126; промежуток периода #f3f4f6 без скруглений, края скруглены снаружи. */
+.cd.we { color: #ed7126; }
+.cd.in { background: var(--p-bg); border-radius: 0; }
+.cd.end.r-s { border-radius: 8px 0 0 8px; }
+.cd.end.r-e { border-radius: 0 8px 8px 0; }
 
 /* ===== Макет 9248-10838: шторки и экраны групп ===== */
 /* Общее: кнопки 48 / 12 / Body 16/20 Medium, вторичная #e8eaed с текстом #525252, кнопки делят ширину поровну. */
@@ -869,6 +874,18 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 /* Уведомление — AlertToast (contrast): #141414, рамка белая 20%, радиус 16, отступ 16, ширина до 360 по центру, Body/3R. */
 .toast { left: 50%; right: auto; transform: translateX(-50%); width: min(360px, calc(100% - 32px)); background: #141414; border: 1px solid rgba(255,255,255,.2); border-radius: 16px; padding: 16px; font-size: 14px; line-height: 18px; letter-spacing: -.1px; animation: toast-up .2s ease; }
 @keyframes toast-up { from { transform: translate(-50%, 40%); opacity: .4; } }
+
+/* Главная кнопка — space-ui-kit Button primary/universal contrast: #0d0d0d, нажатие 75%, неактивная 55% с белым 30%. */
+.btn:not(.sec):not(.danger-fill) { background: #0d0d0d; color: #fff; }
+.btn:not(.sec):not(.danger-fill):active { background: rgba(0,0,0,.75); }
+.btn:not(.sec):not(.danger-fill)[disabled] { opacity: 1; background: rgba(0,0,0,.55); color: rgba(255,255,255,.3); }
+
+/* Баг кита в Figma — делаем по space-ui-kit:
+   поля поиска и выбора группы — Input large: 48, радиус 12, текст 16/20 Medium (на сером фоне — #e8eaed);
+   вторичная кнопка на белой шторке — Button secondary/neutral: #f3f4f6, текст #525252, нажатие #dedfe1. */
+.phone:not(.imp) .field { height: 48px; font-size: 16px; line-height: 20px; letter-spacing: -.1px; }
+.btn.sec { background: var(--p-bg); color: var(--p-sec); }
+.btn.sec:active { background: #dedfe1; color: var(--p-ter); }
 
 /* ===== Режим «только приложение» (сборка для GitHub Pages, класс app-only на <html>):
    прототип на весь экран, как на проде — без рамки телефона, переключателя версий и заметок. ===== */
@@ -1926,7 +1943,9 @@ function sheetHTML() {
       for (let d = m0; d <= last; d = addDays(d, 1)) {
         const isEnd = (from && same(d, from)) || (to && same(d, to));
         const inR = from && to && d > from && d < to;
-        cells += `<button class="cd${isWeekend(d) ? " we" : ""}${isEnd ? " end" : inR ? " in" : ""}${same(d, TODAY) ? " today" : ""}" data-act="cday" data-v="${iso(d)}">${d.getDate()}</button>`;
+        // Края периода (space-ui-kit Calendar): скругление только с внешней стороны, промежуток — сплошная полоса.
+        const edge = from && to && !same(from, to) ? (same(d, from) ? " r-s" : same(d, to) ? " r-e" : "") : "";
+        cells += `<button class="cd${isWeekend(d) ? " we" : ""}${isEnd ? " end" + edge : inR ? " in" : ""}${same(d, TODAY) ? " today" : ""}" data-act="cday" data-v="${iso(d)}">${d.getDate()}</button>`;
       }
       months += `<div class="cal-m" ${k === 2 ? 'id="cal-now"' : ""}><h6>${MONTHS[m0.getMonth()]} ${m0.getFullYear()}</h6><div class="cal-grid">${cells}</div></div>`;
     }
