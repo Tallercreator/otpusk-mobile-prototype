@@ -686,6 +686,7 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .cd.we { color: var(--p-ink); }
 .cd.today::after { top: 30px; bottom: auto; width: 10px; height: 2px; border-radius: 2px; }
 .cd.end { border-radius: 8px; }
+.cd.we.end { color: #fff; }
 
 /* ===== Макет 9248-10838: шторки и экраны групп ===== */
 /* Общее: кнопки 48 / 12 / Body 16/20 Medium, вторичная #e8eaed с текстом #525252, кнопки делят ширину поровну. */
@@ -836,6 +837,38 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .pn-now { height: 40px; padding: 0 12px; border-radius: 12px; background: #f0fbdf; color: #538600; font-size: 14px; line-height: 18px; font-weight: 500; }
 .pn-now[disabled] { background: #f3f4f6; color: var(--p-light); }
 .pn-today-opt { background: #f0fbdf !important; color: #538600; }
+
+/* ===== Сверка со space-ui-kit (бесспорные расхождения) ===== */
+/* Трекинг по шкале кита: 10 px — 0, 12 px — +0.1; Caption/1R 12/14. */
+.phone:not(.imp) .dh span { letter-spacing: 0; }
+.nm em { font-size: 12px; line-height: 14px; letter-spacing: .1px; }
+/* Вес только 400 / 500 / 580 / 640: месяц в календаре — 18/22, 580. */
+.cal-m h6 { font-weight: 580; }
+/* «Сегодня» в шапке дней — lime-intense #538600 (токена #3b5c00 в ките нет). */
+.phone:not(.imp) .dh.today b { color: #538600; }
+/* Ошибка поля: без рамки, заливка red-secondary #fdeeef; текст ошибки — Caption/1R, red-intense #ea2c45. */
+.ge-name.err input { box-shadow: none; background: #fdeeef; }
+.ge-name.err input:focus { box-shadow: inset 0 0 0 1.5px #f7d4d8; }
+.ge-err { font-size: 12px; line-height: 14px; letter-spacing: .1px; color: #ea2c45; }
+/* Счётчик на чипе — Badge small accent: капсула 16, #ff7f32, белый текст 10/10. */
+.count { min-width: 16px; height: 16px; padding: 2px 4px 1px; border-radius: 200px; background: #ff7f32; color: #fff; font-size: 10px; line-height: 10px; letter-spacing: 0; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; }
+/* Красная кнопка — Button primary/red. */
+.btn.danger-fill { background: #e4444a; color: #fff; }
+.btn.danger-fill:active { background: #9f122b; }
+/* Радиусы по шкале: кнопка 40 — 12, кнопка 24 — 8, мелкая подсветка — 4. */
+.g-more, .g-lock { border-radius: 12px; }
+.ge-panel-head .g-more { border-radius: 8px; }
+.res mark { background: #e1f3b4; border-radius: 4px; }
+/* Подтверждение удаления группы — как карточка подтверждения в «Выбранных»: текст 16/20, кнопки 40 / 12, 16/20. */
+.g-confirm { display: flex; flex-direction: column; gap: 12px; padding: 12px; border-radius: 12px; background: #f9f9fa; font-size: 16px; line-height: 20px; color: var(--p-sec); }
+.g-confirm .g-menu { padding: 0; }
+.g-confirm .btn.sm { height: 40px; border-radius: 12px; font-size: 16px; line-height: 20px; padding: 0 12px; }
+/* Плавающая панель — тень floating из кита. */
+.phone:not(.imp) .p-main > .pnav { box-shadow: 0 0 56px rgba(13,10,43,.08); }
+.phone:not(.imp) .p-main > .pnav.pressed { box-shadow: 0 0 32px rgba(13,10,43,.12); }
+/* Уведомление — AlertToast (contrast): #141414, рамка белая 20%, радиус 16, отступ 16, ширина до 360 по центру, Body/3R. */
+.toast { left: 50%; right: auto; transform: translateX(-50%); width: min(360px, calc(100% - 32px)); background: #141414; border: 1px solid rgba(255,255,255,.2); border-radius: 16px; padding: 16px; font-size: 14px; line-height: 18px; letter-spacing: -.1px; animation: toast-up .2s ease; }
+@keyframes toast-up { from { transform: translate(-50%, 40%); opacity: .4; } }
 
 /* ===== Режим «только приложение» (сборка для GitHub Pages, класс app-only на <html>):
    прототип на весь экран, как на проде — без рамки телефона, переключателя версий и заметок. ===== */
@@ -1254,7 +1287,8 @@ const AVA_W = 32;
 const compactNames = () => !S.improved && !(S.showOverlaps && S.mode !== "year") && (S.avatarsOnly || (fitsCompact() && !S.namesShown));
 // Автосжатие: «Как в макете», сетка с полной колонкой ФИО — при прокрутке вправо колонка сжимается до аватарок.
 const autoCompactable = () => !S.improved && !compactNames() && !isNoNames() && S.view === "grid";
-const X = `<img src="assets/cross.svg" width="24" height="24" alt="">`;
+// Крестик шторок — IconButton secondary/neutral из space-ui-kit: иконка #525252.
+const X = `<img src="assets/cross-24.svg" width="24" height="24" alt="">`;
 const CHECK = `<img src="assets/check-16.svg" width="16" height="16" alt="">`;
 const ARR = (d) => `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="${d < 0 ? "M12.5 4.5L7 10l5.5 5.5" : "M7.5 4.5L13 10l-5.5 5.5"}" stroke="#222" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const LIST_I = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M8 6h10M8 11h10M8 16h10M4 6h.01M4 11h.01M4 16h.01" stroke="#525252" stroke-width="1.6" stroke-linecap="round"/></svg>`;
