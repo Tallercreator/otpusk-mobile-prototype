@@ -1904,7 +1904,8 @@ function render() {
     if (calTop !== null && lastSheetKind === "calendar") cb.scrollTop = calTop;
     else { const now = document.getElementById("cal-now"); if (now) cb.scrollTop = now.offsetTop - cb.offsetTop; }
   }
-  if (sheetKind === "search" && lastSheetKind !== "search") {
+  // При возврате из карточки клавиатуру заново не открываем — человек смотрит результаты.
+  if (sheetKind === "search" && lastSheetKind !== "search" && !S.sheet.returned) {
     // preventScroll: иначе iOS при открытии клавиатуры сдвигает всю страницу вверх.
     const q = document.getElementById("q"); q.focus({ preventScroll: true });
   }
@@ -2018,7 +2019,7 @@ phone.addEventListener("click", (ev) => {
   if (act === "logo" && longPressed) { longPressed = false; return; }
   switch (act) {
     case "tab": S.tab = v; break;
-    case "close": S.sheet = null; break;
+    case "close": S.sheet = S.sheet?.kind === "card" && S.sheet.back ? S.sheet.back : null; break;
     case "search": S.sheet = { kind: "search", q: "" }; break;
     case "groups": S.sheet = { kind: "groups", draft: [...S.data.selected] }; break;
     case "gtoggle": { const d = S.sheet.draft; S.sheet.draft = d.includes(v) ? d.filter((x) => x !== v) : [...d, v]; break; }
@@ -2179,19 +2180,8 @@ phone.addEventListener("click", (ev) => {
     case "view": S.view = S.view === "grid" ? "list" : "grid"; S.needScroll = true; S.collapsed = false; break;
     case "overlap": S.sheet = { kind: "overlap", date: el.dataset.d }; break;
     case "card": S.sheet = { kind: "card", e: el.dataset.e, a: el.dataset.a }; break;
-    case "pick": {
-      const id = el.dataset.e;
-      const visible = S.view === "grid" && S.mode !== "year" && uniqueVisible().some((e) => e.id === id);
-      if (visible) {
-        S.sheet = null; S.flashId = id; render();
-        const gs = document.getElementById("gs"), r = gs.querySelector(`[data-row="${id}"]`);
-        if (r) gs.scrollTo({ top: gs.scrollTop + r.getBoundingClientRect().top - gs.getBoundingClientRect().top - 140, behavior: "smooth" });
-        setTimeout(() => { S.flashId = null; }, 2500);
-        return;
-      }
-      S.sheet = { kind: "card", e: id, a: null };
-      break;
-    }
+    // Из поиска открывается карточка сотрудника; закрыли её — снова поиск с тем же запросом и результатами.
+    case "pick": S.sheet = { kind: "card", e: el.dataset.e, a: null, back: { ...S.sheet, returned: true } }; break;
     case "logo": break;
     case "navtab": if (v !== "vacation") toast(`Раздел «${NAV_TABS.find((t) => t[0] === v)[1]}» вне прототипа`); else if (S.tab !== "team") S.tab = "team"; break;
     case "scen": loadScenario(v); break;
