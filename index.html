@@ -701,7 +701,7 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .sheet.screen > .ge-name, .sheet.screen > .ge-add { margin: 8px 16px 0; }
 .sheet.screen > .ge-add { margin-top: 24px; }
 .sheet.screen > .sh-body { padding: 24px 16px 8px; gap: 0; }
-.sheet.screen > #ge-bar { padding: 0 16px 8px; }
+.sheet.screen > #ge-bar { padding: 0 16px; }
 .sheet.screen > .sh-foot { padding: 16px; }
 @media (max-width: 430px) { .device .sheet.screen { padding-top: 0; } }
 .ge-name { gap: 8px; }
@@ -744,7 +744,7 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .sheet.screen .res .nm { font-size: 14px; line-height: 18px; font-weight: 500; }
 .sheet.screen .res small { font-size: 12px; line-height: 14px; letter-spacing: .1px; color: var(--p-ter); }
 /* Полоса «Выбрано N человек»: 40 / 8, #f3f4f6, текст 14/18 #525252, шеврон 16. */
-.ge-bar { height: 40px; padding: 8px; gap: 12px; border-radius: 8px; background: var(--p-bg); font-size: 14px; line-height: 18px; color: var(--p-sec); }
+.ge-bar { height: 48px; padding: 12px; gap: 12px; border-radius: 12px; background: var(--p-bg); font-size: 14px; line-height: 18px; color: var(--p-sec); }
 .ge-bar.off { color: var(--p-ter); }
 /* Список выбранных: шапка «Выбрано N» + корзина, подразделения через 16 с линией, сотрудники без отступа. */
 .ge-panel-head { gap: 12px; padding: 0; margin-bottom: 24px; font-size: 14px; line-height: 18px; color: var(--p-ter); }
@@ -765,6 +765,36 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .ge-exit .sh-head h2 { min-height: 40px; display: flex; align-items: center; }
 .ge-exit .sh-head p { margin-top: 2px; }
 .ge-exit .sh-foot { padding: 16px; }
+
+/* ===== Макеты 9467-51685, 9463-36655, 9462-28279, 9462-29647: обновлённые экраны групп ===== */
+/* Подразделения списком через 24, без линий; «N человек» 12/14. */
+.sheet.screen .org-row { border-bottom: 0; padding-bottom: 0; margin-bottom: 24px; }
+.sheet.screen .org-open small { font-size: 12px; line-height: 14px; letter-spacing: .1px; }
+.sheet.screen .org-open .txt small.org-path { font-size: 12px; }
+/* Уровень: заголовок 18/22, подпись через 2; «Выбрать всех» 14/18 #717171 без счётчика. */
+.org-title { font-size: 18px; line-height: 22px; gap: 2px; }
+.org-chk.wide .txt b { font-size: 14px; line-height: 18px; font-weight: 400; color: var(--p-ter); }
+/* Сотрудник: ФИО 16/20 Medium, строка 34. */
+.sheet.screen .res { min-height: 34px; }
+.sheet.screen .res .nm { font-size: 16px; line-height: 20px; }
+/* Выбранные: от шапки до списка 32, группы через 24 без линий, сотрудники с отступом 40. */
+.ge-panel-head { margin-bottom: 32px; }
+.ge-grp { padding-bottom: 0; margin-bottom: 24px; border-bottom: 0; }
+.ge-grp:last-child { margin-bottom: 0; }
+.ge-team-list { padding-left: 40px; }
+/* Подтверждение очистки: #f9f9fa / 12 / 12, текст 16/20 #525252, кнопки 40 / 12. */
+.ge-confirm { display: flex; flex-direction: column; gap: 12px; padding: 12px; border-radius: 12px; background: #f9f9fa; margin: -8px 0 24px; font-size: 16px; line-height: 20px; color: var(--p-sec); }
+.ge-confirm .g-menu { display: flex; gap: 8px; padding: 0; }
+.ge-confirm .btn.sm { flex: 1; height: 40px; border-radius: 12px; font-size: 16px; line-height: 20px; padding: 0 12px; }
+
+/* Список выбранных: подразделения карточками #f9f9fa / 12 через 16, под названием «Выбрано N человек»;
+   сотрудники выровнены по тексту названия (24 + 12). */
+.ge-grp { background: #f9f9fa; border-radius: 12px; padding: 12px; margin-bottom: 16px; gap: 16px; }
+.ge-team-tg { align-items: center; }
+.ge-team-tg .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; }
+.ge-team-tg .txt > span { font-size: 16px; line-height: 20px; font-weight: 500; letter-spacing: -.1px; color: var(--p-ink); }
+.ge-team-tg .txt small { font-size: 12px; line-height: 14px; letter-spacing: .1px; color: var(--p-ter); }
+.ge-team-list { padding-left: 36px; }
 
 /* ===== Макет 9248-10838: главный экран ===== */
 /* Сжатая колонка: аватар 28 с одной буквой 14/18 (как в развёрнутой). */
@@ -1683,12 +1713,13 @@ function geditBody(sh) {
     const teams = [...new Set(listed.map((e) => e.team))];
     const isOpen = (t) => sh.open[t] ?? listed.length <= 20;
     let html = `<div class="ge-panel-head"><button class="org-chk" data-act="gAll" aria-label="Выбрать всех">${boxHTML(st)}</button><span>Выбрано ${people(sh.members.length)}</span><button class="g-more" data-act="gClear" aria-label="Очистить список">${TRASH_I}</button></div>`;
-    if (sh.confirmClear) html += `<div class="ge-big"><span>Убрать всех из списка? Выбранные сотрудники не попадут в группу.</span><div class="g-menu"><button class="btn sec sm" data-act="gClearNo">Отмена</button><button class="btn sm danger-fill" data-act="gClearYes">Убрать</button></div></div>`;
+    // Макет 9463-36655: подтверждение очистки — серая карточка с «Отменить / Удалить».
+    if (sh.confirmClear) html += `<div class="ge-confirm" role="alertdialog"><span>Удалить всех из списка?</span><div class="g-menu"><button class="btn sec sm" data-act="gClearNo">Отменить</button><button class="btn sm" data-act="gClearYes">Удалить</button></div></div>`;
     if (!listed.length) return html + `<div class="ge-empty">Пока никого. Добавь людей по подразделению или поиском.</div>`;
-    // Макет 9462-26946: подразделение — галочка, название и шеврон вверх/вниз; сотрудники под ним без отступа.
+    // Подразделение — карточка #f9f9fa: галочка, название, «Выбрано N человек» и шеврон; сотрудники выровнены по названию.
     for (const t of teams) {
       const ids = listed.filter((e) => e.team === t).map((e) => e.id), k = ids.filter((id) => sh.members.includes(id)).length, open = isOpen(t);
-      html += `<div class="ge-grp"><div class="ge-team${open ? " open" : ""}"><button class="org-chk" data-act="gTeamAll" data-v="${esc(t)}" aria-label="Выбрать всех: ${esc(t)}">${boxHTML(triState(ids, sh.members))}</button><button class="ge-team-tg" data-act="gTeamTg" data-v="${esc(t)}" aria-expanded="${open}" aria-label="${esc(t)}: выбрано ${k} из ${ids.length}"><span>${esc(t)}</span>${CHEV_UP24(open)}</button></div>`;
+      html += `<div class="ge-grp"><div class="ge-team${open ? " open" : ""}"><button class="org-chk" data-act="gTeamAll" data-v="${esc(t)}" aria-label="Выбрать всех: ${esc(t)}">${boxHTML(triState(ids, sh.members))}</button><button class="ge-team-tg" data-act="gTeamTg" data-v="${esc(t)}" aria-expanded="${open}" aria-label="${esc(t)}: выбрано ${k} из ${ids.length}"><span class="txt"><span>${esc(t)}</span><small>Выбрано ${people(k)}</small></span>${CHEV_UP24(open)}</button></div>`;
       if (open) html += `<div class="ge-team-list">${listed.filter((e) => e.team === t).map((e) => empRow(e, sh)).join("")}</div>`;
       html += `</div>`;
     }
@@ -1711,7 +1742,7 @@ function geditBody(sh) {
   const ppl = peopleOf(node).map((e) => e.id);
   let html = `${crumbsHTML(trail, sh.crumbsOpen)}
     <div class="org-title"><b>${esc(node.name)}</b>${pathLabel(trail) ? `<small>${esc(pathLabel(trail))}</small>` : ""}</div>
-    <div class="org-row all"><button class="org-chk wide" data-act="orgCheck" data-v="${node.id}">${boxHTML(triState(ppl, sh.members))}<span class="txt"><b>Выбрать всех</b><small>${people(ppl.length)}</small></span></button></div>`;
+    <div class="org-row all"><button class="org-chk wide" data-act="orgCheck" data-v="${node.id}">${boxHTML(triState(ppl, sh.members))}<span class="txt"><b>Выбрать всех</b></span></button></div>`;
   html += node.children ? node.children.map((x) => orgRow(x, sh)).join("") : peopleOf(node).map((e) => empRow(e, sh)).join("");
   return html;
 }
@@ -1724,8 +1755,8 @@ function geditBar(sh) {
     return `<div class="ge-big" role="alertdialog" aria-label="Подтверждение"><span>Добавить <b>${people(sh.big.n)}</b> из «${esc(trail[top].name)}»?</span><div class="g-menu"><button class="btn sec sm" data-act="bigCancel">Отмена</button><button class="btn sm" data-act="bigOk">Добавить</button></div></div>`;
   }
   if (!sh.listed.length) return `<div class="ge-bar off">Пока никого не выбрано</div>`;
-  // Макет: у новой группы шеврон смотрит вправо, у редактирования — вверх.
-  return `<button class="ge-bar" data-act="gePanel">${boxHTML(triState(sh.listed, sh.members))}<span>Выбрано ${people(sh.members.length)}</span><img class="${sh.id ? "" : "ch-r"}" src="assets/chevron-up-16.svg" width="16" height="16" alt=""></button>`;
+  // Макет 9462-27692: плашка 48 / 12, шеврон вправо — список выбранных открывается отдельным экраном.
+  return `<button class="ge-bar" data-act="gePanel">${boxHTML(triState(sh.listed, sh.members))}<span>Выбрано ${people(sh.members.length)}</span><img class="ch-r" src="assets/chevron-up-16.svg" width="16" height="16" alt=""></button>`;
 }
 // Новый экран группы: по умолчанию таб «По подразделению», как на десктопе.
 // Таб «По подразделению» открывается там, где человек остановился в прошлый раз (S.lastOrgPath).
@@ -1829,9 +1860,9 @@ function sheetHTML() {
     // «По подразделению / По сотрудникам», панель «Выбрано N человек», «Удалить группу» и «Сохранить».
     const editing = !!sh.id;
     const ph = sh.tab === "org" ? "Поиск по подразделению" : "Поиск по ФИО сотрудника";
-    // Макет 9462-26946: у списка выбранных крестик справа возвращает к выбору — это не выход из экрана.
+    // Список выбранных: «Назад» внизу возвращает к выбору, крестик закрывает весь экран группы (с вопросом, если есть изменения).
     const headHTML = sh.panel
-      ? `<div class="sh-head"><div class="t"><h2>Выбранные сотрудники</h2></div><button class="x" data-act="gePanel" aria-label="Назад к выбору">${X}</button></div>`
+      ? `<div class="sh-head"><div class="t"><h2>Выбранные сотрудники</h2></div><button class="x" data-act="geExit" aria-label="Закрыть">${X}</button></div>`
       : `<div class="sh-head"><div class="t"><h2>${editing ? "Редактирование группы" : "Добавление новой группы"}</h2></div><button class="x" data-act="geBack" aria-label="Закрыть">${X}</button></div>`;
     // Выход с несохранёнными изменениями — сначала спросить (макет 9462-28967: шторка снизу поверх размытого экрана).
     const exitDlg = sh.confirmExit ? `<div class="ge-dlg-scrim" data-act="exitStay"></div><div class="ge-exit" role="alertdialog" aria-labelledby="ge-dlg-t"><div class="sh-head"><div class="t"><h2 id="ge-dlg-t">Выйти без сохранения</h2><p>${editing ? "Изменения в группе не сохранятся" : "Название и выбранные сотрудники не сохранятся"}</p></div><button class="x" data-act="exitStay" aria-label="Остаться">${X}</button></div><div class="sh-foot"><button class="btn sec" data-act="exitStay">Остаться</button><button class="btn" data-act="exitLeave">Выйти</button></div></div>` : "";
@@ -1841,7 +1872,7 @@ function sheetHTML() {
       <div class="s-input"><img src="assets/left-icon.svg" width="16" height="16" alt=""><input id="ge-q" type="search" placeholder="${ph}" value="${esc(sh.q)}" autocomplete="off"></div></div>`}
       <div class="sh-body" id="ge-body">${geditBody(sh)}</div>
       ${sh.panel ? "" : `<div id="ge-bar">${geditBar(sh)}</div>`}
-      <div class="sh-foot ge-foot">${sh.panel ? `<button class="btn" data-act="gSave">Сохранить</button>`
+      <div class="sh-foot ge-foot">${sh.panel ? `<button class="btn sec" data-act="gePanel">Назад</button><button class="btn" data-act="gSave">Сохранить</button>`
         : `${editing ? `<button class="btn sec" data-act="gAskDelEdit">Удалить группу</button>` : ""}<button class="btn" data-act="gSave">Сохранить</button>`}</div>${exitDlg}`, { screen: true });
   }
   if (sh.kind === "addto") {
@@ -2127,6 +2158,7 @@ phone.addEventListener("click", (ev) => {
     }
     case "gAskDelEdit": S.sheet = { ...S.sheet.back, kind: "groups", draft: S.sheet.back?.draft ?? [...S.data.selected], menu: S.sheet.id, confirm: S.sheet.id }; break;
     case "geBack": geditClose(); break;
+    case "geExit": if (geditDirty(S.sheet)) S.sheet.confirmExit = true; else S.sheet = S.sheet.back || null; break;
     case "gPick": {
       const sh = S.sheet, id = el.dataset.e;
       sh.members = sh.members.includes(id) ? sh.members.filter((x) => x !== id) : [...sh.members, id];
@@ -2136,8 +2168,12 @@ phone.addEventListener("click", (ev) => {
     }
     case "gSave": {
       const sh = S.sheet, name = sh.name.trim();
-      if (!name) { geditError("Введи название группы"); return; }
-      if (S.data.groups.some((g) => g.id !== sh.id && norm(g.name) === norm(name))) { geditError("Группа с таким названием уже есть"); return; }
+      const err = !name ? "Введи название группы" : S.data.groups.some((g) => g.id !== sh.id && norm(g.name) === norm(name)) ? "Группа с таким названием уже есть" : "";
+      if (err) {
+        // Из списка выбранных — сначала назад к форме, к полю названия, и там показываем ошибку.
+        if (sh.panel) { sh.panel = false; render(); }
+        geditError(err); return;
+      }
       if (sh.id) {
         Object.assign(groupById(sh.id), { name, members: [...sh.members] });
         toast(`Группа «${esc(name)}» сохранена`);
