@@ -785,6 +785,28 @@ table.audit td:first-child { font-weight: 500; width: 30%; }
 .phone:not(.imp) .g-row.nn-lane .g-track { height: 28px; border-radius: 4px; background: var(--p-alpha); }
 .phone:not(.imp) .g-row.nn-lane .bar { top: 2px; }
 
+/* ===== Макет 9463-37828: плавающая панель периода ===== */
+/* Белая капсула над графиком: 12 от краёв карточки и 16 над таб баром, padding 8, радиус 12, тень 0 0 22 / 8%. График уходит под неё. */
+.phone:not(.imp) .p-main > .pnav { position: absolute; left: 20px; right: 20px; bottom: 16px; z-index: 6; margin: 0; padding: 8px; height: auto; border-radius: 12px; background: var(--p-white); box-shadow: 0 0 22px rgba(0,0,0,.08); }
+.app-only .phone:not(.imp) .p-main > .pnav { padding-bottom: 8px; }
+.phone:not(.imp) .p-main .gscroll { padding-bottom: 88px; }
+/* Тап по панели: вся капсула сжимается к точке касания (--ox), отпускание — пружина с лёгким перелётом. */
+.phone:not(.imp) .p-main > .pnav { transform-origin: var(--ox, 50%) 50%; transition: transform .5s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease; -webkit-tap-highlight-color: transparent; }
+.phone:not(.imp) .p-main > .pnav.pressed { transform: scale(.95); box-shadow: 0 0 12px rgba(0,0,0,.10); transition-duration: .12s; transition-timing-function: ease-out; }
+.phone:not(.imp) .p-main > .pnav.spring { animation: pn-spring .55s cubic-bezier(.34,1.56,.64,1); }
+@keyframes pn-spring { 0% { transform: scale(.95); } 55% { transform: scale(1.015); } 100% { transform: scale(1); } }
+.pnav .arr, .pnav .cur { -webkit-tap-highlight-color: transparent; }
+@media (prefers-reduced-motion: reduce) { .phone:not(.imp) .p-main > .pnav { transition: none; animation: none !important; } .phone:not(.imp) .p-main > .pnav.pressed { transform: none; } }
+
+/* Варианты «К сегодня» (S.todayVar). */
+.pn-chip { position: absolute; left: 50%; top: -44px; transform: translateX(-50%); height: 32px; padding: 0 14px; border-radius: 16px; background: var(--p-ink); color: #fff; font-size: 14px; line-height: 18px; font-weight: 500; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,.16); }
+.pnav.pn-alt .cur { padding-left: 8px; min-width: 0; }
+.pnav.pn-alt .pn-lbl { overflow: hidden; text-overflow: ellipsis; }
+.pn-r { display: flex; gap: 4px; flex: none; }
+.pn-now { height: 40px; padding: 0 12px; border-radius: 12px; background: #f0fbdf; color: #538600; font-size: 14px; line-height: 18px; font-weight: 500; }
+.pn-now[disabled] { background: #f3f4f6; color: var(--p-light); }
+.pn-today-opt { background: #f0fbdf !important; color: #538600; }
+
 /* ===== Режим «только приложение» (сборка для GitHub Pages, класс app-only на <html>):
    прототип на весь экран, как на проде — без рамки телефона, переключателя версий и заметок. ===== */
 html.app-only, html.app-only body { height: 100%; overflow: hidden; overscroll-behavior: none; }
@@ -1103,6 +1125,9 @@ const S = {
   mode: "month", anchor: new Date(2026, 7, 1), range: null,
   showOverlaps: true, groupByTeam: false, hideLongTerm: true, legendFilter: null, avatarsOnly: false, autoCompact: false, pinVis: 0,
   view: "grid", sheet: null, collapsed: false, flashId: null, toast: null, needScroll: true,
+  // «К сегодня» пока скрыта — расположение обсуждается с командой. Варианты для сравнения:
+  // ?today=now (плашка у подписи) | chip (плавающая кнопка) | nav («Сегодня» в панели) | sheet (в «Периодах»).
+  todayVar: new URLSearchParams(location.search).get("today") || "off",
 };
 function loadScenario(id) {
   S.scenario = id; S.data = buildScenario(id); S.sheet = null; S.legendFilter = null; S.needScroll = true;
@@ -1508,10 +1533,21 @@ function pnavHTML() {
   else if (!S.improved) { const ds = visibleDays(); label = `${fullDate(ds[0])} - ${fullDate(ds[ds.length - 1])}`; }
   else label = periodLabel()[0];
   const unit = { week: "неделя", month: "месяц", year: quarterYear() ? "квартал" : "год", range: "период" }[S.mode];
-  const back = periodHasToday() ? "" : `<button class="pn-today" data-act="today">К сегодня</button>`;
-  return `<div class="pnav"><button class="arr" data-act="step" data-v="-1" aria-label="Предыдущий ${unit}"><img src="assets/chevron-left-24.svg" width="24" height="24" alt=""></button>
-    <span class="pn-mid"><button class="cur" data-act="periods" aria-label="Выбрать период: ${esc(label)}"><span class="pn-lbl">${esc(label)}</span><img src="assets/chevron-down-24.svg" width="24" height="24" alt=""></button>${back}</span>
-    <button class="arr" data-act="step" data-v="1" aria-label="Следующий ${unit}"><img src="assets/chevron-right-24.svg" width="24" height="24" alt=""></button></div>`;
+  // Варианты «К сегодня» (S.todayVar): now — плашка рядом с подписью; chip — плавающая кнопка над панелью;
+  // nav — «Сегодня» всегда в панели, стрелки справа; sheet — только в шторке «Периоды».
+  const off = !periodHasToday(), tv = S.todayVar;
+  // Тап по панели: вся капсула сжимается к точке касания и отпружинивает (кнопки и подпись не анимируются).
+  // Если тап перерисовал экран, пружина доигрывается на новой панели — точка касания в S.navSpring.
+  const spring = S.navSpring; S.navSpring = null;
+  const cur = `<button class="cur" data-act="periods" aria-label="Выбрать период: ${esc(label)}"><span class="pn-lbl">${esc(label)}</span><img src="assets/chevron-down-24.svg" width="24" height="24" alt=""></button>`;
+  const prev = `<button class="arr" data-act="step" data-v="-1" aria-label="Предыдущий ${unit}"><img src="assets/chevron-left-24.svg" width="24" height="24" alt=""></button>`;
+  const next = `<button class="arr" data-act="step" data-v="1" aria-label="Следующий ${unit}"><img src="assets/chevron-right-24.svg" width="24" height="24" alt=""></button>`;
+  if (tv === "nav") return `<div class="pnav pn-alt">${cur}<span class="pn-r"><button class="pn-now" data-act="today"${off ? "" : " disabled"}>Сегодня</button>${prev}${next}</span></div>`;
+  const back = off && tv === "now" ? `<button class="pn-today" data-act="today">К сегодня</button>` : "";
+  const chip = off && tv === "chip" ? `<button class="pn-chip" data-act="today">К сегодня</button>` : "";
+  return `<div class="pnav${spring != null ? " spring" : ""}"${spring != null ? ` style="--ox:${spring}px"` : ""}>${chip}${prev}
+    <span class="pn-mid">${cur}${back}</span>
+    ${next}</div>`;
 }
 const LOCK_I = `<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4.5" y="9" width="11" height="8" rx="2" stroke="#ababab" stroke-width="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="#ababab" stroke-width="1.5"/></svg>`;
 const DOTS_I = `<svg width="20" height="20" viewBox="0 0 20 20" fill="#525252"><circle cx="4.5" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="15.5" cy="10" r="1.6"/></svg>`;
@@ -1741,7 +1777,8 @@ function sheetHTML() {
     // Макет 9462-31799: «Неделя / Месяц», кварталы текущего и следующего года, «Выбрать период».
     const years = [TODAY.getFullYear(), TODAY.getFullYear() + 1];
     const qs = (y) => `<div class="p-year"><span>${y}</span><div class="opts q4">${[0, 1, 2, 3].map((k) => o(`q:${y}-${k}`, `Q${k + 1}`)).join("")}</div></div>`;
-    return sheetWrap(`${head("Периоды")}<div class="sh-body p-opts"><div class="opts two">${o("week", "Неделя")}${o("month", "Месяц")}</div>${years.map(qs).join("")}${rangeBtn}</div>
+    const todayBtn = S.todayVar === "sheet" && !periodHasToday() ? `<button class="opt wide pn-today-opt" data-act="today">Вернуться к сегодня</button>` : "";
+    return sheetWrap(`${head("Периоды")}<div class="sh-body p-opts">${todayBtn}<div class="opts two">${o("week", "Неделя")}${o("month", "Месяц")}</div>${years.map(qs).join("")}${rangeBtn}</div>
       <div class="sh-foot"><button class="btn" data-act="pApply">Применить</button></div>`);
   }
   if (sh.kind === "legend") {
@@ -2175,7 +2212,7 @@ phone.addEventListener("click", (ev) => {
       break;
     }
     case "step": step(Number(v)); break;
-    case "today": goToday(); break;
+    case "today": goToday(); if (S.sheet?.kind === "periods") S.sheet = null; break;
     case "month": S.mode = "month"; S.anchor = new Date(S.anchor.getFullYear(), Number(v), 1); S.needScroll = true; break;
     case "view": S.view = S.view === "grid" ? "list" : "grid"; S.needScroll = true; S.collapsed = false; break;
     case "overlap": S.sheet = { kind: "overlap", date: el.dataset.d }; break;
@@ -2203,6 +2240,21 @@ phone.addEventListener("pointerdown", (ev) => {
   lpTimer = setTimeout(() => { longPressed = true; S.sheet = { kind: "scenario" }; render(); }, 550);
 });
 ["pointerup", "pointerleave", "pointercancel"].forEach((t) => phone.addEventListener(t, () => clearTimeout(lpTimer)));
+// Плавающая панель периода (макет 9463-37828): палец на панели — капсула сжимается к точке касания.
+phone.addEventListener("pointerdown", (ev) => {
+  const nav = ev.target.closest(".phone:not(.imp) .p-main > .pnav");
+  if (!nav) return;
+  const x = Math.round(ev.clientX - nav.getBoundingClientRect().left);
+  nav.style.setProperty("--ox", x + "px"); nav.classList.add("pressed");
+  S.navSpring = x;
+});
+const navRelease = () => setTimeout(() => {
+  // Тап ничего не перерисовал — отпускаем ту же панель (переход сам отпружинит).
+  S.navSpring = null;
+  phone.querySelector(".p-main > .pnav.pressed")?.classList.remove("pressed");
+}, 60);
+phone.addEventListener("pointerup", navRelease);
+phone.addEventListener("pointercancel", navRelease);
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "Escape" && S.sheet) { if (S.sheet.kind === "gedit") geditClose(); else S.sheet = null; render(); }
   if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key.toLowerCase() === "s") { ev.preventDefault(); S.sheet = { kind: "scenario" }; render(); }
